@@ -34,7 +34,7 @@ RUN cd /tmp && \
     mv musl-cross-make-master musl-cross-make && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
-    TARGET=$TARGET make install && \
+    TARGET=$TARGET make install > /tmp/musl-cross-make.log 2>&1 && \
     cd /tmp && \
     rm -rf /tmp/musl-cross-make
 
