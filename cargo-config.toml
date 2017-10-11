@@ -1,0 +1,27 @@
+[build]
+# Target musl-libc by default when running Cargo.
+target = "x86_64-unknown-linux-musl"
+
+[target.x86_64-unknown-linux-musl]
+linker = "x86_64-linux-musl-gcc"
+
+[target.arm-unknown-linux-musleabi]
+linker = "arm-linux-musleabi-gcc"
+
+[target.arm-unknown-linux-musleabihf]
+linker = "arm-linux-musleabihf-gcc"
+
+[target.armv7-unknown-linux-musleabihf]
+linker = "arm-linux-musleabihf-gcc"
+
+[target.i686-unknown-linux-musl]
+linker = "i686-linux-musl-gcc"
+
+[target.aarch64-unknown-linux-musl]
+linker = "aarch64-linux-musl-gcc"
+
+[target.mips-unknown-linux-musl]
+linker = "mips-linux-musl-gcc"
+
+[target.mipsel-unknown-linux-musl]
+linker = "mipsel-linux-musl-gcc"
