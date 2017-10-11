@@ -28,13 +28,13 @@ RUN apt-get update && \
 
 ADD config.mak /tmp/config.mak
 RUN cd /tmp && \
-    curl -L -o musl-cross-make.zip https://github.com/richfelker/musl-cross-make/archive/master.zip && \
-    unzip musl-cross-make.zip && \
+    curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/musl-cross-make/archive/master.zip && \
+    unzip -q musl-cross-make.zip && \
     rm musl-cross-make.zip && \
     mv musl-cross-make-master musl-cross-make && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
-    TARGET=$TARGET make install > /tmp/musl-cross-make.log 2>&1 && \
+    TARGET=$TARGET make install > /tmp/musl-cross-make.log && \
     cd /tmp && \
     rm -rf /tmp/musl-cross-make /tmp/musl-cross-make.log
 
@@ -57,7 +57,7 @@ ENV C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
 # interact with the user or fool around with TTYs.  We also set the default
 # `--target` to musl so that our users don't need to keep overriding it
 # manually.
-RUN curl https://sh.rustup.rs -sSf | \
+RUN curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --default-toolchain $TOOLCHAIN && \
     rustup target add $TARGET
 ADD cargo-config.toml /home/rust/.cargo/config
@@ -71,15 +71,15 @@ WORKDIR /home/rust/libs
 RUN echo "Building zlib" && \
     VERS=1.2.11 && \
     cd /home/rust/libs && \
-    curl -LO http://zlib.net/zlib-$VERS.tar.gz && \
+    curl -sqLO http://zlib.net/zlib-$VERS.tar.gz && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
     ./configure --static --prefix=/usr/local/musl/$TARGET && \
     make && sudo make install && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS && \
     echo "Building OpenSSL" && \
     VERS=1.0.2l && \
-    curl -O https://www.openssl.org/source/openssl-$VERS.tar.gz && \
-    tar xvzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
+    curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
+    tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
     ./Configure $OPENSSL_ARCH --prefix=/usr/local/musl/$TARGET && \
     make depend && \
     make && sudo make install && \

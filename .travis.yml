@@ -1,4 +1,4 @@
-sudo: false
+sudo: required
 
 matrix:
   include:
