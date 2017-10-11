@@ -1,8 +1,6 @@
-# Use Debian 16.04 as the base for our Rust musl toolchain, because of
-# https://github.com/rust-lang/rust/issues/34978 (as of Rust 1.11).
 FROM ubuntu:16.04
 
-# The Rust toolchain to use when building our image.  Set by `hooks/build`.
+# The Rust toolchain to use when building our image
 ARG TOOLCHAIN=stable
 ARG TARGET=x86_64-unknown-linux-musl
 ARG OPENSSL_ARCH=linux-x86_64
@@ -92,10 +90,6 @@ ENV OPENSSL_DIR=/usr/local/musl/$TARGET/ \
     DEP_OPENSSL_INCLUDE=/usr/local/musl/$TARGET/include/ \
     OPENSSL_LIB_DIR=/usr/local/musl/$TARGET/lib/ \
     OPENSSL_STATIC=1
-
-# (Please feel free to submit pull requests for musl-libc builds of other C
-# libraries needed by the most popular and common Rust crates, to avoid
-# everybody needing to build them manually.)
 
 # Expect our source code to live in /home/rust/src.  We'll run the build as
 # user `rust`, which will be uid 1000, gid 1000 outside the container.
