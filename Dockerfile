@@ -83,7 +83,7 @@ RUN echo "Building zlib" && \
     ./Configure $OPENSSL_ARCH --prefix=/usr/local/musl/$TARGET && \
     make depend && \
     make && sudo make install && \
-    cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS && \
+    cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS
 
 ENV OPENSSL_DIR=/usr/local/musl/$TARGET/ \
     OPENSSL_INCLUDE_DIR=/usr/local/musl/$TARGET/include/ \
