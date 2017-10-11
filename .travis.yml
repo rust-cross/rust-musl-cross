@@ -13,7 +13,7 @@ matrix:
 script:
   - export DOCKER_REPO=messense/rust-musl-cross
   - echo "Building Docker image for target ${TARGET}"
-  - docker build --build-arg TARGET="$TARGET" --build-arg OPENSSL_ARCH="$OPENSSL_ARCH" -t $DOCKER_REPO:$IMAGE_TAG
+  - docker build --build-arg TARGET="$TARGET" --build-arg OPENSSL_ARCH="$OPENSSL_ARCH" -t $DOCKER_REPO:$IMAGE_TAG .
 
 after_success:
   - |
