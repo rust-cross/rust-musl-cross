@@ -1,0 +1,22 @@
+sudo: false
+
+matrix:
+  include:
+    - env: IMAGE_TAG=x86_64-musl TARGET=x86_64-unknown-linux-musl OPENSSL_ARCH=linux-x86_64
+    - env: IMAGE_TAG=arm-musleabi TARGET=arm-unknown-linux-musleabi OPENSSL_ARCH=linux-generic32
+    - env: IMAGE_TAG=arm-musleabihf TARGET=arm-unknown-linux-musleabihf OPENSSL_ARCH=linux-generic32
+    - env: IMAGE_TAG=armv7-musleabihf TARGET=armv7-unknown-linux-musleabihf OPENSSL_ARCH=linux-generic32
+    - env: IMAGE_TAG=i686-musl TARGET=i686-unknown-linux-musl OPENSSL_ARCH=linux-generic32
+    - env: IMAGE_TAG=mips-musl TARGET=mips-unknown-linux-musl OPENSSL_ARCH=linux-generic32
+    - env: IMAGE_TAG=mipsel-musl TARGET=mipsel-unknown-linux-musl OPENSSL_ARCH=linux-generic32
+
+script:
+  - export DOCKER_REPO=messense/rust-musl-cross
+  - echo "Building Docker image for target ${TARGET}"
+  - docker build --build-arg TARGET="$TARGET" --build-arg OPENSSL_ARCH="$OPENSSL_ARCH" -t $DOCKER_REPO:$IMAGE_TAG
+
+after_success:
+  - |
+    if [[ "$TRAVIS_OS_NAME" == "linux" && "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
+    docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && docker push $DOCKER_REPO
+    fi
