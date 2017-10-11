@@ -36,7 +36,7 @@ RUN cd /tmp && \
     cd /tmp/musl-cross-make && \
     TARGET=$TARGET make install > /tmp/musl-cross-make.log 2>&1 && \
     cd /tmp && \
-    rm -rf /tmp/musl-cross-make
+    rm -rf /tmp/musl-cross-make /tmp/musl-cross-make.log
 
 # Allow sudo without a password.
 ADD sudoers /etc/sudoers.d/nopasswd
