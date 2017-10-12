@@ -35,7 +35,7 @@ rust-musl-builder cargo build --release
 
 This command assumes that `$(pwd)` is readable and writable by uid 1000, gid 1000. It will output binaries in `armv7-unknown-linux-musleabihf`. At the moment, it doesn't attempt to cache libraries between builds, so this is best reserved for making final release builds.
 
-## How it workers
+## How it works
 
 `rust-musl-cross` uses [musl-libc][], [musl-gcc][] with the help of [musl-cross-make][] to make it easy to compile, and the new
 [rustup][] `target` support.  It includes static versions of several
