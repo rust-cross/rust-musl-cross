@@ -1,0 +1,10 @@
+[package]
+authors = ["root"]
+name = "test-musl"
+version = "0.1.0"
+
+[dependencies]
+env_logger = "0.4"
+error-chain = "0.11"
+openssl-probe = "0.1"
+reqwest = "0.8"
