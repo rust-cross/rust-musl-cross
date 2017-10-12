@@ -33,7 +33,8 @@ alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src messense
 rust-musl-builder cargo build --release
 ```
 
-This command assumes that `$(pwd)` is readable and writable by uid 1000, gid 1000. It will output binaries in `armv7-unknown-linux-musleabihf`. At the moment, it doesn't attempt to cache libraries between builds, so this is best reserved for making final release builds.
+This command assumes that `$(pwd)` is readable and writable by uid 1000, gid 1000. It will output binaries in `armv7-unknown-linux-musleabihf`.
+At the moment, it doesn't attempt to cache libraries between builds, so this is best reserved for making final release builds.
 
 ## How it works
 
@@ -43,6 +44,22 @@ libraries:
 
 - The standard `musl-libc` libraries.
 - OpenSSL, which is needed by many Rust applications.
+
+## Making OpenSSL work
+
+If your application uses OpenSSL, you will also need to take a few extra steps
+to make sure that it can find OpenSSL's list of trusted certificates,
+which is stored in different locations on different Linux distributions.
+You can do this using [`openssl-probe`](https://crates.io/crates/openssl-probe) as follows:
+
+```rust
+extern crate openssl_probe;
+
+fn main() {
+    openssl_probe::init_ssl_cert_env_vars();
+    //... your code
+}
+```
 
 
 [musl-libc]: http://www.musl-libc.org/
