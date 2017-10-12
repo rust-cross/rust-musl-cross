@@ -33,7 +33,7 @@ alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src messense
 rust-musl-builder cargo build --release
 ```
 
-This command assumes that `$(pwd)` is readable and writable by uid 1000, gid 1000. It will output binaries in `armv7-unknown-linux-musleabihf`.
+This command assumes that `$(pwd)` is readable and writable. It will output binaries in `armv7-unknown-linux-musleabihf`.
 At the moment, it doesn't attempt to cache libraries between builds, so this is best reserved for making final release builds.
 
 ## How it works

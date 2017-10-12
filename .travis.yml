@@ -18,7 +18,7 @@ script:
   - export DOCKER_REPO=messense/rust-musl-cross
   - echo "Building Docker image for target ${TARGET}"
   - docker build --build-arg TARGET="$TARGET" --build-arg OPENSSL_ARCH="$OPENSSL_ARCH" -t $DOCKER_REPO:$IMAGE_TAG .
-  - docker run --rm -it -v "$(pwd)/tests":/home/rust/src:Z $DOCKER_REPO:$IMAGE_TAG cargo build
+  - docker run --rm -it -v "$(pwd)/tests":/home/rust/src $DOCKER_REPO:$IMAGE_TAG cargo build
 
 after_success:
   - |
