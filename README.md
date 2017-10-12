@@ -37,7 +37,7 @@ This command assumes that `$(pwd)` is readable and writable by uid 1000, gid 100
 
 ## How it workers
 
-`rust-musl-builder` uses [musl-libc][], [musl-gcc][] with the help of [musl-cross-make][] to make it easy to compile, and the new
+`rust-musl-cross` uses [musl-libc][], [musl-gcc][] with the help of [musl-cross-make][] to make it easy to compile, and the new
 [rustup][] `target` support.  It includes static versions of several
 libraries:
 
