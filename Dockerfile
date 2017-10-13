@@ -70,7 +70,7 @@ RUN echo "Building zlib" && \
     VERS=1.0.2l && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
-    ./Configure $OPENSSL_ARCH --prefix=/usr/local/musl/$TARGET && \
+    ./Configure $OPENSSL_ARCH -fPIC --prefix=/usr/local/musl/$TARGET && \
     make depend && \
     make && sudo make install && \
     cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS
