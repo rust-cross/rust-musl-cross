@@ -50,7 +50,7 @@ ENV C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
 RUN curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --default-toolchain $TOOLCHAIN && \
     rustup target add $TARGET
-RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /home/rust/.cargo/config
+RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 
 # We'll build our libraries in subdirectories of /home/rust/libs.  Please
 # clean up when you're done.
