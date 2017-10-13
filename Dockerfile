@@ -9,9 +9,6 @@ ARG OPENSSL_ARCH=linux-x86_64
 # here is to support the musl-libc builds and Cargo builds needed for a
 # large selection of the most popular crates.
 #
-# We also set up a `rust` user by default, in whose account we'll install
-# the Rust toolchain.  This user has sudo privileges if you need to install
-# any more software.
 RUN apt-get update && \
     apt-get install -y \
         build-essential \
@@ -23,8 +20,7 @@ RUN apt-get update && \
         xutils-dev \
         unzip \
         && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    useradd rust --user-group --create-home --shell /bin/bash --groups sudo
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ADD config.mak /tmp/config.mak
 RUN cd /tmp && \
@@ -38,17 +34,11 @@ RUN cd /tmp && \
     cd /tmp && \
     rm -rf /tmp/musl-cross-make /tmp/musl-cross-make.log
 
-# Allow sudo without a password.
-ADD sudoers /etc/sudoers.d/nopasswd
-
-# Run all further code as user `rust`, and create our working directories
-# as the appropriate user.
-USER rust
 RUN mkdir -p /home/rust/libs /home/rust/src
 
 # Set up our path with all our binary directories, including those for the
 # musl-gcc toolchain and for our Rust toolchain.
-ENV PATH=/home/rust/.cargo/bin:/usr/local/musl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV PATH=/root/.cargo/bin:/usr/local/musl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV CC=$TARGET-gcc
 ENV C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
 
@@ -60,7 +50,7 @@ ENV C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
 RUN curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --default-toolchain $TOOLCHAIN && \
     rustup target add $TARGET
-RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /home/rust/.cargo/config
+RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 
 # We'll build our libraries in subdirectories of /home/rust/libs.  Please
 # clean up when you're done.
@@ -80,7 +70,7 @@ RUN echo "Building zlib" && \
     VERS=1.0.2l && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
-    ./Configure $OPENSSL_ARCH --prefix=/usr/local/musl/$TARGET && \
+    ./Configure $OPENSSL_ARCH -fPIC --prefix=/usr/local/musl/$TARGET && \
     make depend && \
     make && sudo make install && \
     cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS
@@ -91,6 +81,5 @@ ENV OPENSSL_DIR=/usr/local/musl/$TARGET/ \
     OPENSSL_LIB_DIR=/usr/local/musl/$TARGET/lib/ \
     OPENSSL_STATIC=1
 
-# Expect our source code to live in /home/rust/src.  We'll run the build as
-# user `rust`, which will be uid 1000, gid 1000 outside the container.
+# Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src

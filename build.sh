@@ -10,6 +10,6 @@ docker build --build-arg TARGET=armv7-unknown-linux-musleabihf --build-arg OPENS
 # i686-unknown-linux-musl
 docker build --build-arg TARGET=i686-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-generic32 -t messense/rust-musl-cross:i686-musl .
 # mips-unknown-linux-musl
-docker build --build-arg TARGET=mips-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-generic32 -t messense/rust-musl-cross:mips-musl .
+docker build --build-arg TARGET=mips-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-mips32 -t messense/rust-musl-cross:mips-musl .
 # mipsel-unknown-linux-musl
-docker build --build-arg TARGET=mipsel-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-generic32 -t messense/rust-musl-cross:mipsel-musl .
+docker build --build-arg TARGET=mipsel-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-mips32 -t messense/rust-musl-cross:mipsel-musl .
