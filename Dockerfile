@@ -63,7 +63,7 @@ RUN echo "Building zlib" && \
     cd /home/rust/libs && \
     curl -sqLO http://zlib.net/zlib-$VERS.tar.gz && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
-    ./configure --static --prefix=/usr/local/musl/$TARGET && \
+    ./configure --static -fPIC --prefix=/usr/local/musl/$TARGET && \
     make && sudo make install && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS && \
     echo "Building OpenSSL" && \
