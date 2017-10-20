@@ -17,7 +17,7 @@ OUTPUT = /usr/local/musl
 
 # BINUTILS_VER = 2.25.1
 # GCC_VER = 5.2.0
-# MUSL_VER = git-master
+MUSL_VER = 1.1.17
 # GMP_VER =
 # MPC_VER =
 # MPFR_VER =
