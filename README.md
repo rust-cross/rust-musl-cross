@@ -19,6 +19,7 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 | stable         | armv7-unknown-linux-musleabihf      | armv7-musleabihf    |
 | stable         | mips-unknown-linux-musl             | mips-musl           |
 | stable         | mipsel-unknown-linux-musl           | mipsel-musl         |
+| nightly        | aarch64-unknown-linux-musl          | aarch64-musl        |
 
 To use `armv7-unknown-linux-musleabihf` target for example, first pull the image:
 

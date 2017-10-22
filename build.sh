@@ -13,3 +13,5 @@ docker build --build-arg TARGET=i686-unknown-linux-musl --build-arg OPENSSL_ARCH
 docker build --build-arg TARGET=mips-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-mips32 -t messense/rust-musl-cross:mips-musl .
 # mipsel-unknown-linux-musl
 docker build --build-arg TARGET=mipsel-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-mips32 -t messense/rust-musl-cross:mipsel-musl .
+# aarch64-unknown-linux-musl
+docker build --build-arg TOOLCHAIN=nightly --build-arg TARGET=aarch64-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-aarch64 -t messense/rust-musl-cross:aarch64-musl .
