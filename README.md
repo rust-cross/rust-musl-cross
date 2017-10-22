@@ -61,6 +61,16 @@ fn main() {
 }
 ```
 
+## Use beta/nightly Rust
+
+Currently we install stable Rust by default, if you want to switch to beta/nightly Rust, you can do it by extending
+from our Docker image, for example to use beta Rust for target `x86_64-unknown-linux-musl`:
+
+```dockerfile
+FROM messense/rust-musl-cross:x86_64-musl
+RUN rustup update beta && \
+    rustup target add --toolchain beta x86_64-unknown-linux-musl
+```
 
 [musl-libc]: http://www.musl-libc.org/
 [musl-gcc]: http://www.musl-libc.org/how.html
