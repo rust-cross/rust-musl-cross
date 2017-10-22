@@ -16,7 +16,7 @@ OUTPUT = /usr/local/musl
 # headers, which are not needed unless compiling programs that use them.
 
 # BINUTILS_VER = 2.25.1
-# GCC_VER = 5.2.0
+GCC_VER = 7.2.0
 MUSL_VER = 1.1.17
 # GMP_VER =
 # MPC_VER =
