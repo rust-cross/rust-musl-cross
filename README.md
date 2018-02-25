@@ -72,6 +72,14 @@ RUN rustup update beta && \
     rustup target add --toolchain beta x86_64-unknown-linux-musl
 ```
 
+## Strip binaries
+
+You can use the `musl-strip` command inside the image to strip binaries, for example:
+
+```bash
+docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf musl-strip /home/rust/src/target/release/example
+```
+
 [musl-libc]: http://www.musl-libc.org/
 [musl-gcc]: http://www.musl-libc.org/how.html
 [musl-cross-make]: https://github.com/richfelker/musl-cross-make
