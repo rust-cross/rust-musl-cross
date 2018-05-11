@@ -59,8 +59,8 @@ WORKDIR /home/rust/libs
 
 # Build a static library version of OpenSSL using musl-libc.  This is
 # needed by the popular Rust `hyper` crate.
-RUN CC=$TARGET_CC && \
-    C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
+RUN export CC=$TARGET_CC && \
+    export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     echo "Building zlib" && \
     VERS=1.2.11 && \
     cd /home/rust/libs && \
