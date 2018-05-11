@@ -40,8 +40,8 @@ RUN mkdir -p /home/rust/libs /home/rust/src
 # Set up our path with all our binary directories, including those for the
 # musl-gcc toolchain and for our Rust toolchain.
 ENV PATH=/root/.cargo/bin:/usr/local/musl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ENV CC=$TARGET-gcc
-ENV C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
+ENV TARGET_CC=$TARGET-gcc
+ENV TARGET_C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
 
 # Install our Rust toolchain and the `musl` target.  We patch the
 # command-line we pass to the installer so that it won't attempt to
@@ -59,7 +59,9 @@ WORKDIR /home/rust/libs
 
 # Build a static library version of OpenSSL using musl-libc.  This is
 # needed by the popular Rust `hyper` crate.
-RUN echo "Building zlib" && \
+RUN export CC=$TARGET_CC && \
+    export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
+    echo "Building zlib" && \
     VERS=1.2.11 && \
     cd /home/rust/libs && \
     curl -sqLO http://zlib.net/zlib-$VERS.tar.gz && \
