@@ -5,6 +5,8 @@ ARG TOOLCHAIN=stable
 ARG TARGET=x86_64-unknown-linux-musl
 ARG OPENSSL_ARCH=linux-x86_64
 
+ENV RUST_MUSL_CROSS_TARGET=$TARGET
+
 # Make sure we have basic dev tools for building C libraries.  Our goal
 # here is to support the musl-libc builds and Cargo builds needed for a
 # large selection of the most popular crates.
