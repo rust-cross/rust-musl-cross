@@ -16,7 +16,7 @@ error_chain! {
 }
 
 fn run() -> Result<()> {
-    env_logger::init().expect("Failed to initialize logger");
+    env_logger::init();
     openssl_probe::init_ssl_cert_env_vars();
 
     println!("GET https://www.rust-lang.org");
