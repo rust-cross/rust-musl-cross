@@ -87,5 +87,8 @@ ENV OPENSSL_DIR=/usr/local/musl/$TARGET/ \
     OPENSSL_LIB_DIR=/usr/local/musl/$TARGET/lib/ \
     OPENSSL_STATIC=1
 
+# Remove docs and more stuff not needed in this images to make them smaller
+RUN rm -rf /root/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/share/
+
 # Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src
