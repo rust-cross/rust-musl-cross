@@ -73,7 +73,7 @@ RUN export CC=$TARGET_CC && \
     make && sudo make install && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS && \
     echo "Building OpenSSL" && \
-    VERS=1.0.2o && \
+    VERS=1.0.2p && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
     ./Configure $OPENSSL_ARCH -fPIC --prefix=/usr/local/musl/$TARGET && \
