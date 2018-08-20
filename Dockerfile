@@ -66,20 +66,26 @@ RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     echo "Building zlib" && \
     VERS=1.2.11 && \
+    CHECKSUM=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1 && \
     cd /home/rust/libs && \
-    curl -sqLO http://zlib.net/zlib-$VERS.tar.gz && \
+    curl -sqLO https://zlib.net/zlib-$VERS.tar.gz && \
+    echo "$CHECKSUM zlib-$VERS.tar.gz" > checksums.txt && \
+    sha256sum -c checksums.txt && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
     ./configure --static --archs="-fPIC" --prefix=/usr/local/musl/$TARGET && \
     make && sudo make install && \
-    cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS && \
+    cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt && \
     echo "Building OpenSSL" && \
     VERS=1.0.2p && \
+    CHECKSUM=50a98e07b1a89eb8f6a99477f262df71c6fa7bef77df4dc83025a2845c827d00 && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
+    echo "$CHECKSUM openssl-$VERS.tar.gz" > checksums.txt && \
+    sha256sum -c checksums.txt && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
     ./Configure $OPENSSL_ARCH -fPIC --prefix=/usr/local/musl/$TARGET && \
     make depend && \
     make && sudo make install && \
-    cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS
+    cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS checksums.txt
 
 ENV OPENSSL_DIR=/usr/local/musl/$TARGET/ \
     OPENSSL_INCLUDE_DIR=/usr/local/musl/$TARGET/include/ \
