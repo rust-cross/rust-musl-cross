@@ -76,8 +76,8 @@ RUN export CC=$TARGET_CC && \
     make && sudo make install && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt && \
     echo "Building OpenSSL" && \
-    VERS=1.0.2p && \
-    CHECKSUM=50a98e07b1a89eb8f6a99477f262df71c6fa7bef77df4dc83025a2845c827d00 && \
+    VERS=1.0.2q && \
+    CHECKSUM=5744cfcbcec2b1b48629f7354203bc1e5e9b5466998bbccc5b5fcde3b18eb684 && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
     echo "$CHECKSUM openssl-$VERS.tar.gz" > checksums.txt && \
     sha256sum -c checksums.txt && \
