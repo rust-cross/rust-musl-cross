@@ -51,7 +51,8 @@ ENV TARGET_C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
 # interact with the user or fool around with TTYs.  We also set the default
 # `--target` to musl so that our users don't need to keep overriding it
 # manually.
-RUN chmod 755 /root/ # Allow other users access binary inside /root/.cargo/bin! (for example azure-piplines).
+# Chmod 755 is set for root directory to allow access execute binaries in /root/.cargo/bin (azure piplines create own user).
+RUN chmod 755 /root/ \
     curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --default-toolchain $TOOLCHAIN && \
     rustup target add $TARGET
