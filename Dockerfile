@@ -51,7 +51,9 @@ ENV TARGET_C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
 # interact with the user or fool around with TTYs.  We also set the default
 # `--target` to musl so that our users don't need to keep overriding it
 # manually.
-RUN curl https://sh.rustup.rs -sqSf | \
+# Chmod 755 is set for root directory to allow access execute binaries in /root/.cargo/bin (azure piplines create own user).
+RUN chmod 755 /root/ && \
+    curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --default-toolchain $TOOLCHAIN && \
     rustup target add $TARGET
 RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
