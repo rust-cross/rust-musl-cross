@@ -9,6 +9,7 @@ matrix:
     - env: IMAGE_TAG=x86_64-musl TARGET=x86_64-unknown-linux-musl OPENSSL_ARCH=linux-x86_64
     - env: IMAGE_TAG=arm-musleabi TARGET=arm-unknown-linux-musleabi OPENSSL_ARCH=linux-generic32
     - env: IMAGE_TAG=arm-musleabihf TARGET=arm-unknown-linux-musleabihf OPENSSL_ARCH=linux-generic32
+    - env: IMAGE_TAG=armv5te-musleabi TARGET=armv5te-unknown-linux-musleabi OPENSSL_ARCH=linux-generic32
     - env: IMAGE_TAG=armv7-musleabihf TARGET=armv7-unknown-linux-musleabihf OPENSSL_ARCH=linux-generic32
     - env: IMAGE_TAG=i686-musl TARGET=i686-unknown-linux-musl OPENSSL_ARCH=linux-generic32
     - env: IMAGE_TAG=mips-musl TARGET=mips-unknown-linux-musl OPENSSL_ARCH=linux-mips32
