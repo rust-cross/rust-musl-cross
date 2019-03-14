@@ -17,6 +17,7 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 | stable         | arm-unknown-linux-musleabi          | arm-musleabi        |
 | stable         | arm-unknown-linux-musleabihf        | arm-musleabihf      |
 | stable         | armv7-unknown-linux-musleabihf      | armv7-musleabihf    |
+| stable         | armv5te-unknown-linux-musleabi      | armv5te-musleabi    |
 | stable         | mips-unknown-linux-musl             | mips-musl           |
 | stable         | mipsel-unknown-linux-musl           | mipsel-musl         |
 
