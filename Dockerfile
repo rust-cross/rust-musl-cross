@@ -26,10 +26,10 @@ RUN apt-get update && \
 
 ADD config.mak /tmp/config.mak
 RUN cd /tmp && \
-    curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/musl-cross-make/archive/master.zip && \
+    curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/musl-cross-make/archive/v0.9.8.zip && \
     unzip -q musl-cross-make.zip && \
     rm musl-cross-make.zip && \
-    mv musl-cross-make-master musl-cross-make && \
+    mv musl-cross-make-0.9.8 musl-cross-make && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
     TARGET=$TARGET make install > /tmp/musl-cross-make.log && \
