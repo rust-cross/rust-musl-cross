@@ -94,13 +94,13 @@ RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     export LD=$TARGET-ld && \
     echo "Building OpenSSL" && \
-    VERS=1.0.2u && \
-    CHECKSUM=ecd0c6ffb493dd06707d38b14bb4d8c2288bb7033735606569d8f90f89669d16 && \
+    VERS=1.1.1j && \
+    CHECKSUM=aaf2fcb575cdf6491b98ab4829abf78a3dec8402b8b81efc8f23c00d443981bf && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
     echo "$CHECKSUM openssl-$VERS.tar.gz" > checksums.txt && \
     sha256sum -c checksums.txt && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
-    ./Configure $OPENSSL_ARCH -fPIC --prefix=$TARGET_HOME && \
+    ./Configure -fPIC --prefix=$TARGET_HOME no-dso no-shared no-unit-test no-zlib no-zlib-dynamic no-async $OPENSSL_ARCH && \
     make -j4 && make install && \
     cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS checksums.txt
 
