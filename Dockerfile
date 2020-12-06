@@ -21,8 +21,13 @@ RUN apt-get update && \
         sudo \
         xutils-dev \
         unzip \
+        ca-certificates \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install cross-signed Let's Encrypt R3 CA certificate
+ADD lets-encrypt-r3-cross-signed.crt /usr/local/share/ca-certificates
+RUN update-ca-certificates
 
 ADD config.mak /tmp/config.mak
 RUN cd /tmp && \
