@@ -20,6 +20,7 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 | stable         | armv5te-unknown-linux-musleabi      | armv5te-musleabi    |
 | stable         | mips-unknown-linux-musl             | mips-musl           |
 | stable         | mipsel-unknown-linux-musl           | mipsel-musl         |
+| stable         | aarch64-unknown-linux-musl          | aarch64-musl        |
 
 To use `armv7-unknown-linux-musleabihf` target for example, first pull the image:
 

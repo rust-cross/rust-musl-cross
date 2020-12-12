@@ -12,6 +12,7 @@ matrix:
     - env: IMAGE_TAG=i686-musl TARGET=i686-unknown-linux-musl OPENSSL_ARCH=linux-generic32
     - env: IMAGE_TAG=mips-musl TARGET=mips-unknown-linux-musl OPENSSL_ARCH=linux-mips32
     - env: IMAGE_TAG=mipsel-musl TARGET=mipsel-unknown-linux-musl OPENSSL_ARCH=linux-mips32
+    - env: IMAGE_TAG=aarch64-musl TARGET=aarch64-unknown-linux-musl OPENSSL_ARCH=linux-aarch64
 
 script:
   - export DOCKER_REPO=messense/rust-musl-cross
