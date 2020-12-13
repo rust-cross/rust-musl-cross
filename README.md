@@ -12,15 +12,17 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 
 | Rust toolchain | Cross Compile Target                | Docker Image Tag    |
 |----------------|-------------------------------------|---------------------|
-| stable         | x86\_64-unknown-linux-musl          | x86\_64-musl        |
-| stable         | i686-unknown-linux-musl             | i686-musl           |
+| stable         | aarch64-unknown-linux-musl          | aarch64-musl        |
 | stable         | arm-unknown-linux-musleabi          | arm-musleabi        |
 | stable         | arm-unknown-linux-musleabihf        | arm-musleabihf      |
-| stable         | armv7-unknown-linux-musleabihf      | armv7-musleabihf    |
 | stable         | armv5te-unknown-linux-musleabi      | armv5te-musleabi    |
+| stable         | armv7-unknown-linux-musleabi        | armv7-musleabi      |
+| stable         | armv7-unknown-linux-musleabihf      | armv7-musleabihf    |
+| stable         | i586-unknown-linux-musl             | i586-musl           |
+| stable         | i686-unknown-linux-musl             | i686-musl           |
 | stable         | mips-unknown-linux-musl             | mips-musl           |
 | stable         | mipsel-unknown-linux-musl           | mipsel-musl         |
-| stable         | aarch64-unknown-linux-musl          | aarch64-musl        |
+| stable         | x86\_64-unknown-linux-musl          | x86\_64-musl        |
 
 To use `armv7-unknown-linux-musleabihf` target for example, first pull the image:
 
