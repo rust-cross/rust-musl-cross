@@ -9,9 +9,9 @@ jobs:
     strategy:
       matrix:
         env:
-          - IMAGE_TAG: x86_64-musl
-            TARGET: x86_64-unknown-linux-musl
-            OPENSSL_ARCH: linux-x86_64
+          - IMAGE_TAG: aarch64-musl
+            TARGET: aarch64-unknown-linux-musl
+            OPENSSL_ARCH: linux-aarch64
           - IMAGE_TAG: arm-musleabi
             TARGET: arm-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
@@ -33,9 +33,9 @@ jobs:
           - IMAGE_TAG: mipsel-musl
             TARGET: mipsel-unknown-linux-musl
             OPENSSL_ARCH: linux-mips32
-          - IMAGE_TAG: aarch64-musl
-            TARGET: aarch64-unknown-linux-musl
-            OPENSSL_ARCH: linux-aarch64
+          - IMAGE_TAG: x86_64-musl
+            TARGET: x86_64-unknown-linux-musl
+            OPENSSL_ARCH: linux-x86_64
     env: ${{ matrix.env }}
     steps:
       - uses: actions/checkout@v2
