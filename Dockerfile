@@ -37,7 +37,7 @@ RUN cd /tmp && \
     mv musl-cross-make-0.9.8 musl-cross-make && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
-    TARGET=$TARGET make install > /tmp/musl-cross-make.log && \
+    TARGET=$TARGET make install -j 4 > /tmp/musl-cross-make.log && \
     ln -s /usr/local/musl/bin/$TARGET-strip /usr/local/musl/bin/musl-strip && \
     cd /tmp && \
     rm -rf /tmp/musl-cross-make /tmp/musl-cross-make.log
@@ -80,7 +80,7 @@ RUN export CC=$TARGET_CC && \
     sha256sum -c checksums.txt && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
     ./configure --static --archs="-fPIC" --prefix=/usr/local/musl/$TARGET && \
-    make && sudo make install && \
+    make && sudo make install -j 4 && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt && \
     echo "Building OpenSSL" && \
     VERS=1.0.2q && \
@@ -91,7 +91,7 @@ RUN export CC=$TARGET_CC && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
     ./Configure $OPENSSL_ARCH -fPIC --prefix=/usr/local/musl/$TARGET && \
     make depend && \
-    make && sudo make install && \
+    make && sudo make install -j 4 && \
     cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS checksums.txt
 
 ENV OPENSSL_DIR=/usr/local/musl/$TARGET/ \
