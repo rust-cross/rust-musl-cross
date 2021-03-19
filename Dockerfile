@@ -1,10 +1,13 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 # The Rust toolchain to use when building our image
 ARG TOOLCHAIN=stable
 ARG TARGET=x86_64-unknown-linux-musl
 ARG OPENSSL_ARCH=linux-x86_64
+ARG RUST_MUSL_MAKE_VER=0.9.9
+ARG RUST_MUSL_MAKE_CONFIG=config.mak
 
+ENV DEBIAN_FRONTEND=noninteractive
 ENV RUST_MUSL_CROSS_TARGET=$TARGET
 
 # Make sure we have basic dev tools for building C libraries.  Our goal
@@ -26,15 +29,14 @@ RUN apt-get update && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install cross-signed Let's Encrypt R3 CA certificate
-ADD lets-encrypt-r3-cross-signed.crt /usr/local/share/ca-certificates
+COPY lets-encrypt-r3-cross-signed.crt /usr/local/share/ca-certificates
 RUN update-ca-certificates
 
-ADD config.mak /tmp/config.mak
-RUN cd /tmp && \
-    curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/musl-cross-make/archive/v0.9.8.zip && \
+COPY $RUST_MUSL_MAKE_CONFIG /tmp/config.mak
+RUN cd /tmp && curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/musl-cross-make/archive/v$RUST_MUSL_MAKE_VER.zip && \
     unzip -q musl-cross-make.zip && \
     rm musl-cross-make.zip && \
-    mv musl-cross-make-0.9.8 musl-cross-make && \
+    mv musl-cross-make-$RUST_MUSL_MAKE_VER musl-cross-make && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
     TARGET=$TARGET make install -j 4 > /tmp/musl-cross-make.log && \
@@ -83,8 +85,8 @@ RUN export CC=$TARGET_CC && \
     make && sudo make install -j 4 && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt && \
     echo "Building OpenSSL" && \
-    VERS=1.0.2q && \
-    CHECKSUM=5744cfcbcec2b1b48629f7354203bc1e5e9b5466998bbccc5b5fcde3b18eb684 && \
+    VERS=1.0.2u && \
+    CHECKSUM=ecd0c6ffb493dd06707d38b14bb4d8c2288bb7033735606569d8f90f89669d16 && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
     echo "$CHECKSUM openssl-$VERS.tar.gz" > checksums.txt && \
     sha256sum -c checksums.txt && \

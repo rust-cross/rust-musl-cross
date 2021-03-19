@@ -16,30 +16,39 @@ jobs:
           - IMAGE_TAG: aarch64-musl
             TARGET: aarch64-unknown-linux-musl
             OPENSSL_ARCH: linux-aarch64
+            RUST_MUSL_MAKE_CONFIG: config.mak
           - IMAGE_TAG: arm-musleabi
             TARGET: arm-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: arm-musleabihf
             TARGET: arm-unknown-linux-musleabihf
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
             OPENSSL_ARCH: linux-generic32
           - IMAGE_TAG: armv5te-musleabi
             TARGET: armv5te-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: armv7-musleabi
             TARGET: armv7-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: armv7-musleabihf
             TARGET: armv7-unknown-linux-musleabihf
             OPENSSL_ARCH: linux-generic32
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: i586-musl
             TARGET: i586-unknown-linux-musl
             OPENSSL_ARCH: linux-elf
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: i686-musl
             TARGET: i686-unknown-linux-musl
             OPENSSL_ARCH: linux-elf
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: mips-musl
             TARGET: mips-unknown-linux-musl
             OPENSSL_ARCH: linux-mips32
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           # - IMAGE_TAG: mips64-muslabi64
           #   TARGET: mips64-unknown-linux-muslabi64
           #   OPENSSL_ARCH: linux64-mips64
@@ -49,15 +58,17 @@ jobs:
           - IMAGE_TAG: mipsel-musl
             TARGET: mipsel-unknown-linux-musl
             OPENSSL_ARCH: linux-mips32
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: x86_64-musl
             TARGET: x86_64-unknown-linux-musl
             OPENSSL_ARCH: linux-x86_64
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
     env: ${{ matrix.env }}
     steps:
       - uses: actions/checkout@v2
       - name: Build Docker image
         run: |
-          docker build --build-arg TARGET="$TARGET" --build-arg OPENSSL_ARCH="$OPENSSL_ARCH" -t messense/rust-musl-cross:$IMAGE_TAG .
+          docker build --build-arg TARGET="$TARGET" --build-arg OPENSSL_ARCH="$OPENSSL_ARCH" --build-arg RUST_MUSL_MAKE_CONFIG="$RUST_MUSL_MAKE_CONFIG" -t messense/rust-musl-cross:$IMAGE_TAG .
           docker run --rm -v "$(pwd)/tests":/home/rust/src messense/rust-musl-cross:$IMAGE_TAG cargo build
       - name: Push Docker image
         if: github.ref == 'refs/heads/master'
