@@ -21,10 +21,11 @@ jobs:
             TARGET: arm-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
             RUST_MUSL_MAKE_CONFIG: config.mak.32
-          - IMAGE_TAG: arm-musleabihf
-            TARGET: arm-unknown-linux-musleabihf
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            OPENSSL_ARCH: linux-generic32
+          # TODO: REENABLE WHEN SOLUTION FOUND
+          # - IMAGE_TAG: arm-musleabihf
+          #   TARGET: arm-unknown-linux-musleabihf
+          #   RUST_MUSL_MAKE_CONFIG: config.mak.32
+          #   OPENSSL_ARCH: linux-generic32
           - IMAGE_TAG: armv5te-musleabi
             TARGET: armv5te-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
@@ -33,10 +34,11 @@ jobs:
             TARGET: armv7-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
             RUST_MUSL_MAKE_CONFIG: config.mak.32
-          - IMAGE_TAG: armv7-musleabihf
-            TARGET: armv7-unknown-linux-musleabihf
-            OPENSSL_ARCH: linux-generic32
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
+          # TODO: REENABLE WHEN SOLUTION FOUND
+          # - IMAGE_TAG: armv7-musleabihf
+          #   TARGET: armv7-unknown-linux-musleabihf
+          #   OPENSSL_ARCH: linux-generic32
+          #   RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: i586-musl
             TARGET: i586-unknown-linux-musl
             OPENSSL_ARCH: linux-elf
