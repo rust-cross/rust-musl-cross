@@ -21,11 +21,10 @@ jobs:
             TARGET: arm-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
             RUST_MUSL_MAKE_CONFIG: config.mak.32
-          # TODO: REENABLE WHEN SOLUTION FOUND
-          # - IMAGE_TAG: arm-musleabihf
-          #   TARGET: arm-unknown-linux-musleabihf
-          #   RUST_MUSL_MAKE_CONFIG: config.mak.32
-          #   OPENSSL_ARCH: linux-generic32
+          - IMAGE_TAG: arm-musleabihf
+            TARGET: arm-unknown-linux-musleabihf
+            OPENSSL_ARCH: linux-generic32
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: armv5te-musleabi
             TARGET: armv5te-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
@@ -34,11 +33,10 @@ jobs:
             TARGET: armv7-unknown-linux-musleabi
             OPENSSL_ARCH: linux-generic32
             RUST_MUSL_MAKE_CONFIG: config.mak.32
-          # TODO: REENABLE WHEN SOLUTION FOUND
-          # - IMAGE_TAG: armv7-musleabihf
-          #   TARGET: armv7-unknown-linux-musleabihf
-          #   OPENSSL_ARCH: linux-generic32
-          #   RUST_MUSL_MAKE_CONFIG: config.mak.32
+          - IMAGE_TAG: armv7-musleabihf
+            TARGET: armv7-unknown-linux-musleabihf
+            OPENSSL_ARCH: linux-generic32
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: i586-musl
             TARGET: i586-unknown-linux-musl
             OPENSSL_ARCH: linux-elf
@@ -70,8 +68,15 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build Docker image
         run: |
-          docker build --build-arg TARGET="$TARGET" --build-arg OPENSSL_ARCH="$OPENSSL_ARCH" --build-arg RUST_MUSL_MAKE_CONFIG="$RUST_MUSL_MAKE_CONFIG" -t messense/rust-musl-cross:$IMAGE_TAG .
-          docker run --rm -v "$(pwd)/tests":/home/rust/src messense/rust-musl-cross:$IMAGE_TAG cargo build
+          docker build \
+            --build-arg TARGET="$TARGET" \
+            --build-arg OPENSSL_ARCH="$OPENSSL_ARCH" \
+            --build-arg RUST_MUSL_MAKE_CONFIG="$RUST_MUSL_MAKE_CONFIG" \
+            -t messense/rust-musl-cross:$IMAGE_TAG .
+          docker run --rm \
+            -e CFLAGS_armv7_unknown_linux_musleabihf='-mfpu=vfpv3-d16' \
+            -v "$(pwd)/tests":/home/rust/src \
+            messense/rust-musl-cross:$IMAGE_TAG cargo build
       - name: Push Docker image
         if: github.ref == 'refs/heads/master'
         run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} && docker push messense/rust-musl-cross:$IMAGE_TAG
