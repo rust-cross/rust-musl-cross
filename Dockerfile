@@ -98,7 +98,7 @@ RUN export CC=$TARGET_CC && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
     ./Configure $OPENSSL_ARCH -fPIC --prefix=$TARGET_HOME && \
     make depend && \
-    make && sudo make install -j 4 && \
+    make && sudo make install && \
     cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS checksums.txt
 
 ENV OPENSSL_DIR=$TARGET_HOME/ \
