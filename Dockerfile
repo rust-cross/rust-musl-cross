@@ -51,7 +51,8 @@ RUN mkdir -p /home/rust/libs /home/rust/src
 ENV PATH=/root/.cargo/bin:/usr/local/musl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV TARGET_CC=$TARGET-gcc
 ENV TARGET_CXX=$TARGET-g++
-ENV TARGET_C_INCLUDE_PATH=/usr/local/musl/$TARGET/include/
+ENV TARGET_HOME=/usr/local/musl/$TARGET
+ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 
 # Install our Rust toolchain and the `musl` target.  We patch the
 # command-line we pass to the installer so that it won't attempt to
@@ -81,9 +82,13 @@ RUN export CC=$TARGET_CC && \
     echo "$CHECKSUM zlib-$VERS.tar.gz" > checksums.txt && \
     sha256sum -c checksums.txt && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
-    ./configure --static --archs="-fPIC" --prefix=/usr/local/musl/$TARGET && \
+    ./configure --static --archs="-fPIC" --prefix=$TARGET_HOME && \
     make && sudo make install -j 4 && \
-    cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt && \
+    cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt
+
+RUN export CC=$TARGET_CC && \
+    export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
+    export LD=$TARGET-ld && \
     echo "Building OpenSSL" && \
     VERS=1.0.2u && \
     CHECKSUM=ecd0c6ffb493dd06707d38b14bb4d8c2288bb7033735606569d8f90f89669d16 && \
@@ -91,15 +96,15 @@ RUN export CC=$TARGET_CC && \
     echo "$CHECKSUM openssl-$VERS.tar.gz" > checksums.txt && \
     sha256sum -c checksums.txt && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
-    ./Configure $OPENSSL_ARCH -fPIC --prefix=/usr/local/musl/$TARGET && \
+    ./Configure $OPENSSL_ARCH -fPIC --prefix=$TARGET_HOME && \
     make depend && \
     make && sudo make install -j 4 && \
     cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS checksums.txt
 
-ENV OPENSSL_DIR=/usr/local/musl/$TARGET/ \
-    OPENSSL_INCLUDE_DIR=/usr/local/musl/$TARGET/include/ \
-    DEP_OPENSSL_INCLUDE=/usr/local/musl/$TARGET/include/ \
-    OPENSSL_LIB_DIR=/usr/local/musl/$TARGET/lib/ \
+ENV OPENSSL_DIR=$TARGET_HOME/ \
+    OPENSSL_INCLUDE_DIR=$TARGET_HOME/include/ \
+    DEP_OPENSSL_INCLUDE=$TARGET_HOME/include/ \
+    OPENSSL_LIB_DIR=$TARGET_HOME/lib/ \
     OPENSSL_STATIC=1
 
 # Remove docs and more stuff not needed in this images to make them smaller
