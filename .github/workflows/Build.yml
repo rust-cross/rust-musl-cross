@@ -119,6 +119,7 @@ jobs:
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker pull messense/rust-musl-cross:$IMAGE_TAG-arm64
+          docker images
           echo "image: messense/rust-musl-cross:$IMAGE_TAG
           manifests:
             - image: messense/rust-musl-cross:$IMAGE_TAG-amd64
@@ -130,6 +131,7 @@ jobs:
                 architecture: arm64
                 os: linux
           " > manifest.yaml
+          cat manifest.yaml
 
           curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-amd64
           chmod +x manifest-tool
