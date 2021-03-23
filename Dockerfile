@@ -64,7 +64,7 @@ ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 # Remove docs and more stuff not needed in this images to make them smaller
 RUN chmod 755 /root/ && \
     curl https://sh.rustup.rs -sqSf | \
-    sh -s -- -y --default-toolchain $TOOLCHAIN && \
+    sh -s -- -y --profile minimal --default-toolchain $TOOLCHAIN && \
     rustup target add $TARGET && \
     rm -rf /root/.rustup/toolchains/stable-$(uname -m)-unknown-linux-gnu/share/
 RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
