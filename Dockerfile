@@ -60,10 +60,13 @@ ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 # `--target` to musl so that our users don't need to keep overriding it
 # manually.
 # Chmod 755 is set for root directory to allow access execute binaries in /root/.cargo/bin (azure piplines create own user).
+#
+# Remove docs and more stuff not needed in this images to make them smaller
 RUN chmod 755 /root/ && \
     curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --default-toolchain $TOOLCHAIN && \
-    rustup target add $TARGET
+    rustup target add $TARGET && \
+    rm -rf /root/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/share/
 RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 
 # We'll build our libraries in subdirectories of /home/rust/libs.  Please
@@ -106,9 +109,6 @@ ENV OPENSSL_DIR=$TARGET_HOME/ \
     DEP_OPENSSL_INCLUDE=$TARGET_HOME/include/ \
     OPENSSL_LIB_DIR=$TARGET_HOME/lib/ \
     OPENSSL_STATIC=1
-
-# Remove docs and more stuff not needed in this images to make them smaller
-RUN rm -rf /root/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/share/
 
 # Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src
