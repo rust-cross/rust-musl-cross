@@ -82,7 +82,7 @@ jobs:
           else
             echo "::set-output name=push::false"
           fi
-      - name: Build and Push
+      - name: Build amd64 image
         uses: docker/build-push-action@v2
         with:
           platforms: linux/amd64
@@ -90,7 +90,7 @@ jobs:
             TARGET=${{ matrix.env.TARGET }}
             OPENSSL_ARCH=${{ matrix.env.OPENSSL_ARCH }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
-          tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}
+          tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64
           load: true
       - name: Test Docker cargo build
         run: |
@@ -98,6 +98,23 @@ jobs:
             -e CFLAGS_armv7_unknown_linux_musleabihf='-mfpu=vfpv3-d16' \
             -v "$(pwd)/tests":/home/rust/src \
             messense/rust-musl-cross:$IMAGE_TAG cargo build
-      - name: Push Docker image
+      - name: Build and push multiarch image
         if: github.ref == 'refs/heads/master'
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} && docker push messense/rust-musl-cross:$IMAGE_TAG
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker pull messense/rust-musl-cross:$IMAGE_TAG-arm64
+          echo "image: messense/rust-musl-cross:$IMAGE_TAG
+          manifests:
+            - image: messense/rust-musl-cross:$IMAGE_TAG-amd64
+              platform:
+                architecture: amd64
+                os: linux
+            - image: messense/rust-musl-cross:$IMAGE_TAG-arm64
+              platform:
+                architecture: arm64
+                os: linux
+          " > manifest.yaml
+
+          curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-amd64
+          chmod +x manifest-tool
+          ./manifest-tool push from-spec manifest.yaml
