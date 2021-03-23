@@ -75,22 +75,27 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+      - id: set-push
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/master" ]; then
+            echo "::set-output name=push::true"
+          else
+            echo "::set-output name=push::false"
+          fi
       - name: Build and Push
         uses: docker/build-push-action@v2
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           build-args: |
             TARGET=${{ matrix.env.TARGET }}
             OPENSSL_ARCH=${{ matrix.env.OPENSSL_ARCH }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
           tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}
           load: true
+          push: ${{ fromJSON(steps.set-push.outputs.push) }}
       - name: Test Docker cargo build
         run: |
           docker run --rm \
             -e CFLAGS_armv7_unknown_linux_musleabihf='-mfpu=vfpv3-d16' \
             -v "$(pwd)/tests":/home/rust/src \
             messense/rust-musl-cross:$IMAGE_TAG cargo build
-      - name: Push Docker image
-        if: github.ref == 'refs/heads/master'
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} && docker push messense/rust-musl-cross:$IMAGE_TAG
