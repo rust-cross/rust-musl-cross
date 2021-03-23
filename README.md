@@ -8,7 +8,8 @@ inspired by [rust-musl-builder](https://github.com/emk/rust-musl-builder)
 
 ## Prebuilt images
 
-Currently we have the following [prebuilt Docker images on Docker Hub](https://hub.docker.com/r/messense/rust-musl-cross/).
+Currently we have the following [prebuilt Docker images on Docker Hub](https://hub.docker.com/r/messense/rust-musl-cross/),
+ supports x86_64(amd64) and aarch64(arm64) architectures.
 
 | Rust toolchain | Cross Compile Target                | Docker Image Tag    |
 |----------------|-------------------------------------|---------------------|
