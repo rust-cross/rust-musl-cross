@@ -82,6 +82,13 @@ jobs:
           else
             echo "::set-output name=push::false"
           fi
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-${{ matrix.env.TARGET }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.env.TARGET }}-buildx-
       - name: Build amd64 image
         uses: docker/build-push-action@v2
         with:
@@ -92,6 +99,15 @@ jobs:
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
           tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64
           load: true
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+      - name: Move cache
+        run: |
+          # Temp fix
+          # https://github.com/docker/build-push-action/issues/252
+          # https://github.com/moby/buildkit/issues/1896
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       - name: Test Docker cargo build
         run: |
           docker run --rm \
