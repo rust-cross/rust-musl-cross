@@ -113,7 +113,7 @@ jobs:
           docker run --rm \
             -e CFLAGS_armv7_unknown_linux_musleabihf='-mfpu=vfpv3-d16' \
             -v "$(pwd)/tests":/home/rust/src \
-            messense/rust-musl-cross:$IMAGE_TAG cargo build
+            messense/rust-musl-cross:$IMAGE_TAG-amd64 cargo build
       - name: Build and push multiarch image
         if: github.ref == 'refs/heads/master'
         run: |
