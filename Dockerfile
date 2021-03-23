@@ -66,7 +66,7 @@ RUN chmod 755 /root/ && \
     curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --default-toolchain $TOOLCHAIN && \
     rustup target add $TARGET && \
-    rm -rf /root/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/share/
+    rm -rf /root/.rustup/toolchains/stable-$(uname -m)-unknown-linux-gnu/share/
 RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 
 # We'll build our libraries in subdirectories of /home/rust/libs.  Please
