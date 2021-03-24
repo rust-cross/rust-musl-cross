@@ -20,23 +20,23 @@ jobs:
             RUST_MUSL_MAKE_CONFIG: config.mak
           - IMAGE_TAG: arm-musleabi
             TARGET: arm-unknown-linux-musleabi
-            OPENSSL_ARCH: linux-generic32
+            OPENSSL_ARCH: linux-armv4
             RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: arm-musleabihf
             TARGET: arm-unknown-linux-musleabihf
-            OPENSSL_ARCH: linux-generic32
+            OPENSSL_ARCH: linux-armv4
             RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: armv5te-musleabi
             TARGET: armv5te-unknown-linux-musleabi
-            OPENSSL_ARCH: linux-generic32
+            OPENSSL_ARCH: linux-armv4
             RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: armv7-musleabi
             TARGET: armv7-unknown-linux-musleabi
-            OPENSSL_ARCH: linux-generic32
+            OPENSSL_ARCH: linux-armv4
             RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: armv7-musleabihf
             TARGET: armv7-unknown-linux-musleabihf
-            OPENSSL_ARCH: linux-generic32
+            OPENSSL_ARCH: linux-armv4
             RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: i586-musl
             TARGET: i586-unknown-linux-musl
