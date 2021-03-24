@@ -23,8 +23,8 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 | stable         | i686-unknown-linux-musl                     | i686-musl           |
 | stable         | mips-unknown-linux-musl                     | mips-musl           |
 | stable         | mipsel-unknown-linux-musl                   | mipsel-musl         |
-| stable         | mips64-unknown-linux-musleabi64             | mips64-musleabi64   |
-| stable         | mips64el-unknown-linux-musleabi64           | mips64el-musleabi64 |
+| stable         | mips64-unknown-linux-muslabi64              | mips64-muslabi64    |
+| stable         | mips64el-unknown-linux-muslabi64            | mips64el-muslabi64  |
 | stable         | x86\_64-unknown-linux-musl                  | x86\_64-musl        |
 
 To use `armv7-unknown-linux-musleabihf` target for example, first pull the image:
