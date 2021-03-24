@@ -39,7 +39,7 @@ RUN cd /tmp && curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/mu
     mv musl-cross-make-$RUST_MUSL_MAKE_VER musl-cross-make && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
-    TARGET=$TARGET make install -j 4 > /tmp/musl-cross-make.log && \
+    TARGET=$TARGET make install > /tmp/musl-cross-make.log && \
     ln -s /usr/local/musl/bin/$TARGET-strip /usr/local/musl/bin/musl-strip && \
     cd /tmp && \
     rm -rf /tmp/musl-cross-make /tmp/musl-cross-make.log

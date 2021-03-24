@@ -23,3 +23,7 @@ docker build --build-arg TARGET=i586-unknown-linux-musl --build-arg OPENSSL_ARCH
 docker build --build-arg TARGET=mips-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-mips32 --build-arg RUST_MUSL_MAKE_CONFIG=config.mak.32 -t messense/rust-musl-cross:mips-musl .
 # mipsel-unknown-linux-musl
 docker build --build-arg TARGET=mipsel-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-mips32 --build-arg RUST_MUSL_MAKE_CONFIG=config.mak.32 -t messense/rust-musl-cross:mipsel-musl .
+# mips64-unknown-linux-muslabi64
+docker build --build-arg TARGET=mips64-unknown-linux-muslabi64 --build-arg OPENSSL_ARCH=linux64-mips64 --build-arg RUST_MUSL_MAKE_CONFIG=config.mak -t messense/rust-musl-cross:mips64-muslabi64 .
+# mips64el-unknown-linux-muslabi64
+docker build --build-arg TARGET=mips64el-unknown-linux-muslabi64 --build-arg OPENSSL_ARCH=linux64-mips64 --build-arg RUST_MUSL_MAKE_CONFIG=config.mak -t messense/rust-musl-cross:mips64el-muslabi64 .
