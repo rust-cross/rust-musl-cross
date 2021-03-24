@@ -52,11 +52,11 @@ jobs:
           - IMAGE_TAG: mips64-muslabi64
             TARGET: mips64-unknown-linux-muslabi64
             OPENSSL_ARCH: linux64-mips64
-            RUST_MUSL_MAKE_CONFIG: config.mak
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: mips64el-muslabi64
             TARGET: mips64el-unknown-linux-muslabi64
             OPENSSL_ARCH: linux64-mips64
-            RUST_MUSL_MAKE_CONFIG: config.mak
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
           - IMAGE_TAG: mipsel-musl
             TARGET: mipsel-unknown-linux-musl
             OPENSSL_ARCH: linux-mips32
