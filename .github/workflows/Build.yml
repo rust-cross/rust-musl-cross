@@ -10,7 +10,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    continue-on-error: true
     strategy:
       matrix:
         env:
@@ -92,6 +91,11 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.env.TARGET }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.env.TARGET }}-buildx-
+      - name: Clean Docker cache
+        if: "contains(github.event.head_commit.message, '[clean cache]')"
+        continue-on-error: true
+        run: |
+          rm -rf /tmp/.buildx-cache
       - name: Build amd64 image
         uses: docker/build-push-action@v2
         with:
