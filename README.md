@@ -1,10 +1,10 @@
 # rust-musl-cross
 
-Docker images for compiling static Rust binaries using [musl-cross-make][],
-inspired by [rust-musl-builder](https://github.com/emk/rust-musl-builder)
-
 [![Docker Image](https://img.shields.io/docker/pulls/messense/rust-musl-cross.svg?maxAge=2592000)](https://hub.docker.com/r/messense/rust-musl-cross/)
 [![Build](https://github.com/messense/rust-musl-cross/workflows/Build/badge.svg)](https://github.com/messense/rust-musl-cross/actions?query=workflow%3ABuild)
+
+Docker images for compiling static Rust binaries using [musl-cross-make][],
+inspired by [rust-musl-builder](https://github.com/emk/rust-musl-builder)
 
 ## Prebuilt images
 
