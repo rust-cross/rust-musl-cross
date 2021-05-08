@@ -78,11 +78,11 @@ jobs:
             OPENSSL_ARCH: linux-ppc64le
             RUST_MUSL_MAKE_CONFIG: config.mak
             TOOLCHAIN: nightly
-          - IMAGE_TAG: s390x-musl
-            TARGET: s390x-unknown-linux-musl
-            OPENSSL_ARCH: linux64-s390x
-            RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: nightly
+          # - IMAGE_TAG: s390x-musl
+          #   TARGET: s390x-unknown-linux-musl
+          #   OPENSSL_ARCH: linux64-s390x
+          #   RUST_MUSL_MAKE_CONFIG: config.mak
+          #   TOOLCHAIN: nightly
           - IMAGE_TAG: x86_64-musl
             TARGET: x86_64-unknown-linux-musl
             OPENSSL_ARCH: linux-x86_64
