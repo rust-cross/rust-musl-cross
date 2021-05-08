@@ -61,6 +61,14 @@ jobs:
             TARGET: mipsel-unknown-linux-musl
             OPENSSL_ARCH: linux-mips32
             RUST_MUSL_MAKE_CONFIG: config.mak.32
+          - IMAGE_TAG: powerpc64le-musl
+            TARGET: powerpc64le-unknown-linux-musl
+            OPENSSL_ARCH: linux-ppc64le
+            RUST_MUSL_MAKE_CONFIG: config.mak
+          - IMAGE_TAG: s390x-musl
+            TARGET: s390x-unknown-linux-musl
+            OPENSSL_ARCH: linux64-s390x
+            RUST_MUSL_MAKE_CONFIG: config.mak
           - IMAGE_TAG: x86_64-musl
             TARGET: x86_64-unknown-linux-musl
             OPENSSL_ARCH: linux-x86_64

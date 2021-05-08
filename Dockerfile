@@ -1,7 +1,5 @@
 FROM ubuntu:20.04
 
-# The Rust toolchain to use when building our image
-ARG TOOLCHAIN=stable
 ARG TARGET=x86_64-unknown-linux-musl
 ARG OPENSSL_ARCH=linux-x86_64
 ARG RUST_MUSL_MAKE_VER=0.9.9
@@ -54,6 +52,8 @@ ENV TARGET_CXX=$TARGET-g++
 ENV TARGET_HOME=/usr/local/musl/$TARGET
 ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 
+# The Rust toolchain to use when building our image
+ARG TOOLCHAIN=stable
 # Install our Rust toolchain and the `musl` target.  We patch the
 # command-line we pass to the installer so that it won't attempt to
 # interact with the user or fool around with TTYs.  We also set the default
@@ -65,9 +65,9 @@ ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 RUN chmod 755 /root/ && \
     curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --profile minimal --default-toolchain $TOOLCHAIN && \
-    rustup target add $TARGET && \
+    rustup target add $TARGET || rustup component add --toolchain $TOOLCHAIN rust-src && \
     rustup component add --toolchain $TOOLCHAIN rustfmt clippy && \
-    rm -rf /root/.rustup/toolchains/stable-$(uname -m)-unknown-linux-gnu/share/
+    rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$(uname -m)-unknown-linux-gnu/share/
 RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 
 # We'll build our libraries in subdirectories of /home/rust/libs.  Please

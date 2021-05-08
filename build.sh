@@ -27,3 +27,7 @@ docker build --build-arg TARGET=mipsel-unknown-linux-musl --build-arg OPENSSL_AR
 docker build --build-arg TARGET=mips64-unknown-linux-muslabi64 --build-arg OPENSSL_ARCH=linux64-mips64 --build-arg RUST_MUSL_MAKE_CONFIG=config.mak -t messense/rust-musl-cross:mips64-muslabi64 .
 # mips64el-unknown-linux-muslabi64
 docker build --build-arg TARGET=mips64el-unknown-linux-muslabi64 --build-arg OPENSSL_ARCH=linux64-mips64 --build-arg RUST_MUSL_MAKE_CONFIG=config.mak -t messense/rust-musl-cross:mips64el-muslabi64 .
+# powerpc64le-unknown-linux-musl
+docker build --build-arg TARGET=powerpc64le-unknown-linux-musl --build-arg OPENSSL_ARCH=linux-ppc64le --build-arg RUST_MUSL_MAKE_CONFIG=config.mak -t messense/rust-musl-cross:powerpc64le-musl .
+# s390x-unknown-linux-musl
+docker build --build-arg TARGET=s390x-unknown-linux-musl --build-arg OPENSSL_ARCH=linux64-s390x --build-arg RUST_MUSL_MAKE_CONFIG=config.mak -t messense/rust-musl-cross:s390x-musl .
