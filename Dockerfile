@@ -52,24 +52,6 @@ ENV TARGET_CXX=$TARGET-g++
 ENV TARGET_HOME=/usr/local/musl/$TARGET
 ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 
-# The Rust toolchain to use when building our image
-ARG TOOLCHAIN=stable
-# Install our Rust toolchain and the `musl` target.  We patch the
-# command-line we pass to the installer so that it won't attempt to
-# interact with the user or fool around with TTYs.  We also set the default
-# `--target` to musl so that our users don't need to keep overriding it
-# manually.
-# Chmod 755 is set for root directory to allow access execute binaries in /root/.cargo/bin (azure piplines create own user).
-#
-# Remove docs and more stuff not needed in this images to make them smaller
-RUN chmod 755 /root/ && \
-    curl https://sh.rustup.rs -sqSf | \
-    sh -s -- -y --profile minimal --default-toolchain $TOOLCHAIN && \
-    rustup target add $TARGET || rustup component add --toolchain $TOOLCHAIN rust-src && \
-    rustup component add --toolchain $TOOLCHAIN rustfmt clippy && \
-    rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$(uname -m)-unknown-linux-gnu/share/
-RUN echo "[build]\ntarget = \"$TARGET\"\n\n[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
-
 # We'll build our libraries in subdirectories of /home/rust/libs.  Please
 # clean up when you're done.
 WORKDIR /home/rust/libs
@@ -109,6 +91,36 @@ ENV OPENSSL_DIR=$TARGET_HOME/ \
     DEP_OPENSSL_INCLUDE=$TARGET_HOME/include/ \
     OPENSSL_LIB_DIR=$TARGET_HOME/lib/ \
     OPENSSL_STATIC=1
+
+# The Rust toolchain to use when building our image
+ARG TOOLCHAIN=stable
+# Install our Rust toolchain and the `musl` target.  We patch the
+# command-line we pass to the installer so that it won't attempt to
+# interact with the user or fool around with TTYs.  We also set the default
+# `--target` to musl so that our users don't need to keep overriding it
+# manually.
+# Chmod 755 is set for root directory to allow access execute binaries in /root/.cargo/bin (azure piplines create own user).
+#
+# Remove docs and more stuff not needed in this images to make them smaller
+RUN chmod 755 /root/ && \
+    curl https://sh.rustup.rs -sqSf | \
+    sh -s -- -y --profile minimal --default-toolchain $TOOLCHAIN && \
+    rustup target add $TARGET || rustup component add --toolchain $TOOLCHAIN rust-src && \
+    rustup component add --toolchain $TOOLCHAIN rustfmt clippy && \
+    rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$(uname -m)-unknown-linux-gnu/share/
+
+ENV CARGO_BUILD_TARGET=$TARGET
+
+# HACK for powerpc64le-unknown-linux-musl build-std
+ENV CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-L/usr/local/musl/powerpc64le-unknown-linux-musl/lib -L/usr/local/musl/lib/gcc/powerpc64le-unknown-linux-musl/9.2.0/"
+# HACK for s390x-unknown-linux-musl build-std
+ENV CARGO_TARGET_S390X_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-L/usr/local/musl/s390x-unknown-linux-musl/lib -L/usr/local/musl/lib/gcc/s390x-unknown-linux-musl/9.2.0/"
+
+RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
+
+RUN if [ "$TARGET" = "powerpc64le-unknown-linux-musl" ] || [ "$TARGET" = "s390x-unknown-linux-musl" ]; then \
+        echo '[unstable]\nbuild-std = ["std"]' >> /root/.cargo/config; \
+    fi
 
 # Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src
