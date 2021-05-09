@@ -23,6 +23,8 @@ RUN apt-get update && \
         xutils-dev \
         unzip \
         ca-certificates \
+        python3 \
+        python3-pip \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -109,6 +111,8 @@ RUN chmod 755 /root/ && \
     rustup component add --toolchain $TOOLCHAIN rustfmt clippy && \
     rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$(uname -m)-unknown-linux-gnu/share/
 
+ENV RUSTUP_HOME /root/.rustup
+ENV CARGO_HOME /root/.cargo
 ENV CARGO_BUILD_TARGET=$TARGET
 
 # HACK for powerpc64le-unknown-linux-musl build-std
@@ -121,11 +125,6 @@ RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 RUN if [ "$TARGET" = "powerpc64le-unknown-linux-musl" ] || [ "$TARGET" = "s390x-unknown-linux-musl" ]; then \
         echo '[unstable]\nbuild-std = ["std"]' >> /root/.cargo/config; \
     fi
-
-# Install Python 3 for maturin/pyo3/py-spy use cases
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src
