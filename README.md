@@ -47,27 +47,8 @@ At the moment, it doesn't attempt to cache libraries between builds, so this is 
 ## How it works
 
 `rust-musl-cross` uses [musl-libc][], [musl-gcc][] with the help of [musl-cross-make][] to make it easy to compile, and the new
-[rustup][] `target` support.  It includes static versions of several
-libraries:
+[rustup][] `target` support.
 
-- The standard `musl-libc` libraries.
-- OpenSSL, which is needed by many Rust applications.
-
-## Making OpenSSL work
-
-If your application uses OpenSSL, you will also need to take a few extra steps
-to make sure that it can find OpenSSL's list of trusted certificates,
-which is stored in different locations on different Linux distributions.
-You can do this using [`openssl-probe`](https://crates.io/crates/openssl-probe) as follows:
-
-```rust
-extern crate openssl_probe;
-
-fn main() {
-    openssl_probe::init_ssl_cert_env_vars();
-    //... your code
-}
-```
 
 ## Use beta/nightly Rust
 

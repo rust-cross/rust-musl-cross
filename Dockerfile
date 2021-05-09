@@ -1,7 +1,6 @@
 FROM ubuntu:20.04
 
 ARG TARGET=x86_64-unknown-linux-musl
-ARG OPENSSL_ARCH=linux-x86_64
 ARG RUST_MUSL_MAKE_VER=0.9.9
 ARG RUST_MUSL_MAKE_CONFIG=config.mak
 
@@ -65,8 +64,6 @@ ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 # clean up when you're done.
 WORKDIR /home/rust/libs
 
-# Build a static library version of OpenSSL using musl-libc.  This is
-# needed by the popular Rust `hyper` crate.
 RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     echo "Building zlib" && \
@@ -80,26 +77,6 @@ RUN export CC=$TARGET_CC && \
     ./configure --static --archs="-fPIC" --prefix=$TARGET_HOME && \
     make -j$(nproc) && make install && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt
-
-RUN export CC=$TARGET_CC && \
-    export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
-    export LD=$TARGET-ld && \
-    echo "Building OpenSSL" && \
-    VERS=1.0.2u && \
-    CHECKSUM=ecd0c6ffb493dd06707d38b14bb4d8c2288bb7033735606569d8f90f89669d16 && \
-    curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
-    echo "$CHECKSUM openssl-$VERS.tar.gz" > checksums.txt && \
-    sha256sum -c checksums.txt && \
-    tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
-    ./Configure $OPENSSL_ARCH -fPIC --prefix=$TARGET_HOME && \
-    make -j$(nproc) && make install && \
-    cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS checksums.txt
-
-ENV OPENSSL_DIR=$TARGET_HOME/ \
-    OPENSSL_INCLUDE_DIR=$TARGET_HOME/include/ \
-    DEP_OPENSSL_INCLUDE=$TARGET_HOME/include/ \
-    OPENSSL_LIB_DIR=$TARGET_HOME/lib/ \
-    OPENSSL_STATIC=1
 
 # The Rust toolchain to use when building our image
 ARG TOOLCHAIN=stable
