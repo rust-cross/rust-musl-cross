@@ -122,5 +122,10 @@ RUN if [ "$TARGET" = "powerpc64le-unknown-linux-musl" ] || [ "$TARGET" = "s390x-
         echo '[unstable]\nbuild-std = ["std"]' >> /root/.cargo/config; \
     fi
 
+# Install Python 3 for maturin/pyo3/py-spy use cases
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src
