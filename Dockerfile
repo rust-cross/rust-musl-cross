@@ -111,20 +111,16 @@ RUN chmod 755 /root/ && \
     rustup component add --toolchain $TOOLCHAIN rustfmt clippy && \
     rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$(uname -m)-unknown-linux-gnu/share/
 
+RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
+
+# Build std sysroot for targets that doesn't have official std release
+ADD Xargo.toml /tmp/Xargo.toml
+ADD build-std.sh .
+RUN bash build-std.sh
+
 ENV RUSTUP_HOME /root/.rustup
 ENV CARGO_HOME /root/.cargo
 ENV CARGO_BUILD_TARGET=$TARGET
-
-# HACK for powerpc64le-unknown-linux-musl build-std
-ENV CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-L/usr/local/musl/powerpc64le-unknown-linux-musl/lib -L/usr/local/musl/lib/gcc/powerpc64le-unknown-linux-musl/9.2.0/"
-# HACK for s390x-unknown-linux-musl build-std
-ENV CARGO_TARGET_S390X_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-L/usr/local/musl/s390x-unknown-linux-musl/lib -L/usr/local/musl/lib/gcc/s390x-unknown-linux-musl/9.2.0/"
-
-RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
-
-RUN if [ "$TARGET" = "powerpc64le-unknown-linux-musl" ] || [ "$TARGET" = "s390x-unknown-linux-musl" ]; then \
-        echo '[unstable]\nbuild-std = ["std"]' >> /root/.cargo/config; \
-    fi
 
 # Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src
