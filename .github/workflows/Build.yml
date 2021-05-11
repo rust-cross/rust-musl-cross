@@ -142,7 +142,6 @@ jobs:
       - name: Test Docker cargo build
         run: |
           docker run --rm \
-            -e CFLAGS_armv7_unknown_linux_musleabihf='-mfpu=vfpv3-d16' \
             -v "$(pwd)/tests":/home/rust/src \
             messense/rust-musl-cross:$IMAGE_TAG-amd64 cargo build
       - name: Build and push multiarch image

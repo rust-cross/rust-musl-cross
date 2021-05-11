@@ -122,5 +122,7 @@ ENV RUSTUP_HOME /root/.rustup
 ENV CARGO_HOME /root/.cargo
 ENV CARGO_BUILD_TARGET=$TARGET
 
+ENV CFLAGS_armv7_unknown_linux_musleabihf -mfpu=vfpv3-d16
+
 # Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src
