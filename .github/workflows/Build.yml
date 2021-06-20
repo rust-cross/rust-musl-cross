@@ -8,10 +8,13 @@ name: Build
 
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
+    name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
+    runs-on: ${{ matrix.os.label }}
     strategy:
       matrix:
+        os:
+         - { arch: 'amd64', label: ['ubuntu-latest'] }
+         - { arch: 'arm64', label: [self-hosted, ARM64] }
         env:
           - IMAGE_TAG: aarch64-musl
             TARGET: aarch64-unknown-linux-musl
@@ -91,8 +94,6 @@ jobs:
     env: ${{ matrix.env }}
     steps:
       - uses: actions/checkout@v2
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v1
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
@@ -100,35 +101,28 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - id: set-push
-        run: |
-          if [ "$GITHUB_REF" = "refs/heads/master" ]; then
-            echo "::set-output name=push::true"
-          else
-            echo "::set-output name=push::false"
-          fi
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-${{ matrix.env.TARGET }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.env.TARGET }}-buildx-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.env.TARGET }}-buildx-
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.env.TARGET }}-buildx-
       - name: Clean Docker cache
         if: "contains(github.event.head_commit.message, '[clean cache]')"
         continue-on-error: true
         run: |
           rm -rf /tmp/.buildx-cache
-      - name: Build amd64 image
+      - name: docker build
         uses: docker/build-push-action@v2
         with:
-          platforms: linux/amd64
+          platforms: linux/${{ matrix.os.arch }}
           build-args: |
             TARGET=${{ matrix.env.TARGET }}
             OPENSSL_ARCH=${{ matrix.env.OPENSSL_ARCH }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
             TOOLCHAIN=${{ matrix.env.TOOLCHAIN }}
-          tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64
+          tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
@@ -143,12 +137,12 @@ jobs:
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
-            messense/rust-musl-cross:$IMAGE_TAG-amd64 cargo build
+            messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} cargo build
       - name: Build and push multiarch image
         if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker push messense/rust-musl-cross:$IMAGE_TAG-amd64
+          docker push messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
 
           echo "image: messense/rust-musl-cross:$IMAGE_TAG
           manifests:

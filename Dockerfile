@@ -25,6 +25,11 @@ RUN apt-get update && \
         ca-certificates \
         python3 \
         python3-pip \
+        autoconf \
+        autoconf-archive \
+        automake \
+        flex \
+        bison \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
