@@ -44,7 +44,9 @@ RUN cd /tmp && curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/mu
     mv musl-cross-make-$RUST_MUSL_MAKE_VER musl-cross-make && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
-    TARGET=$TARGET make install > /tmp/musl-cross-make.log && \
+    export TARGET=$TARGET && \
+    make -j$(nproc) > /tmp/musl-cross-make.log && \
+    make install >> /tmp/musl-cross-make.log && \
     ln -s /usr/local/musl/bin/$TARGET-strip /usr/local/musl/bin/musl-strip && \
     cd /tmp && \
     rm -rf /tmp/musl-cross-make /tmp/musl-cross-make.log
@@ -76,7 +78,7 @@ RUN export CC=$TARGET_CC && \
     sha256sum -c checksums.txt && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
     ./configure --static --archs="-fPIC" --prefix=$TARGET_HOME && \
-    make && sudo make install -j 4 && \
+    make -j$(nproc) && make install && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt
 
 RUN export CC=$TARGET_CC && \
@@ -90,7 +92,7 @@ RUN export CC=$TARGET_CC && \
     sha256sum -c checksums.txt && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
     ./Configure $OPENSSL_ARCH -fPIC --prefix=$TARGET_HOME && \
-    make -j4 && make install && \
+    make -j$(nproc) && make install && \
     cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS checksums.txt
 
 ENV OPENSSL_DIR=$TARGET_HOME/ \
