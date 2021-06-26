@@ -156,6 +156,6 @@ jobs:
                 os: linux
           " > manifest.yaml
 
-          curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-amd64
+          curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-${{ matrix.os.arch }}
           chmod +x manifest-tool
           ./manifest-tool push from-spec manifest.yaml
