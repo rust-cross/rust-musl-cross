@@ -1,11 +1,6 @@
 FROM ubuntu:20.04
 
-ARG TARGET=x86_64-unknown-linux-musl
-ARG RUST_MUSL_MAKE_VER=0.9.9
-ARG RUST_MUSL_MAKE_CONFIG=config.mak
-
 ENV DEBIAN_FRONTEND=noninteractive
-ENV RUST_MUSL_CROSS_TARGET=$TARGET
 
 # Make sure we have basic dev tools for building C libraries.  Our goal
 # here is to support the musl-libc builds and Cargo builds needed for a
@@ -35,6 +30,11 @@ RUN apt-get update && \
 # Install cross-signed Let's Encrypt R3 CA certificate
 COPY lets-encrypt-r3-cross-signed.crt /usr/local/share/ca-certificates
 RUN update-ca-certificates
+
+ARG TARGET=x86_64-unknown-linux-musl
+ENV RUST_MUSL_CROSS_TARGET=$TARGET
+ARG RUST_MUSL_MAKE_VER=0.9.9
+ARG RUST_MUSL_MAKE_CONFIG=config.mak
 
 COPY $RUST_MUSL_MAKE_CONFIG /tmp/config.mak
 RUN cd /tmp && curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/musl-cross-make/archive/v$RUST_MUSL_MAKE_VER.zip && \
