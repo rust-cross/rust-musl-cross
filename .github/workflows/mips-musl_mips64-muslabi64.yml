@@ -28,7 +28,7 @@ jobs:
           project-id: ${{ secrets.PROJECT_ID }}
           availability-zone: ap-southeast-1b
           ecs-image-id: 93b1fc8d-ee4e-4126-950e-8f4404408acc
-          ecs-instance-type: kc1.xlarge.2
+          ecs-instance-type: kc1.large.2
           vpc-id: ${{ secrets.VPC_ID }}
           subnet-id: ${{ secrets.SUBNET_ID }}
           security-group-id: ${{ secrets.SECURITY_GROUP_ID }}
