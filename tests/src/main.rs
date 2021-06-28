@@ -6,7 +6,6 @@ extern crate reqwest;
 extern crate env_logger;
 #[macro_use]
 extern crate error_chain;
-extern crate openssl_probe;
 
 error_chain! {
     foreign_links {
@@ -17,7 +16,6 @@ error_chain! {
 
 fn run() -> Result<()> {
     env_logger::init();
-    openssl_probe::init_ssl_cert_env_vars();
 
     println!("GET https://www.rust-lang.org");
 

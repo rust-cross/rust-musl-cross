@@ -1,5 +1,7 @@
 on:
   push:
+    branches:
+      - master
   pull_request:
   schedule:
     - cron: '0 0 * * 2'
@@ -26,7 +28,7 @@ jobs:
           project-id: ${{ secrets.PROJECT_ID }}
           availability-zone: ap-southeast-1b
           ecs-image-id: 93b1fc8d-ee4e-4126-950e-8f4404408acc
-          ecs-instance-type: kc1.xlarge.2
+          ecs-instance-type: kc1.large.2
           vpc-id: ${{ secrets.VPC_ID }}
           subnet-id: ${{ secrets.SUBNET_ID }}
           security-group-id: ${{ secrets.SECURITY_GROUP_ID }}
@@ -71,7 +73,6 @@ jobs:
           platforms: linux/${{ matrix.os.arch }}
           build-args: |
             TARGET=${{ matrix.env.TARGET }}
-            OPENSSL_ARCH=${{ matrix.env.OPENSSL_ARCH }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
             TOOLCHAIN=${{ matrix.env.TOOLCHAIN }}
           tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
@@ -86,6 +87,7 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
       - name: Test Docker cargo build
+        if: ${{ !startsWith(matrix.env.TARGET, 'armv5te') }}
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
