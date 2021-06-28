@@ -27,7 +27,7 @@ jobs:
           huawei-cloud-sk: ${{ secrets.HUAWEI_CLOUD_SK }}
           project-id: ${{ secrets.PROJECT_ID }}
           availability-zone: ap-southeast-1b
-          ecs-image-id: 93b1fc8d-ee4e-4126-950e-8f4404408acc
+          ecs-image-id: 3021e45a-5c5b-47ae-920d-2a240d3f26d9
           ecs-instance-type: kc1.large.2
           vpc-id: ${{ secrets.VPC_ID }}
           subnet-id: ${{ secrets.SUBNET_ID }}
