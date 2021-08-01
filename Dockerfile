@@ -24,6 +24,9 @@ RUN apt-get update && \
         automake \
         flex \
         bison \
+        llvm-dev \
+        libclang-dev \
+        clang \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
