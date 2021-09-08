@@ -111,5 +111,11 @@ ENV CARGO_BUILD_TARGET=$TARGET
 
 ENV CFLAGS_armv7_unknown_linux_musleabihf='-mfpu=vfpv3-d16'
 
+# Build statically linked binaries for MIPS targets
+ENV CARGO_TARGET_MIPS_UNKNOWN_LINUX_MUSL_RUSTFLAGS='-C target-features=+crt-static'
+ENV CARGO_TARGET_MIPSEL_UNKNOWN_LINUX_MUSL_RUSTFLAGS='-C target-features=+crt-static'
+ENV CARGO_TARGET_MIPS64_UNKNOWN_LINUX_MUSLABI64_RUSTFLAGS='-C target-features=+crt-static'
+ENV CARGO_TARGET_MIPS64EL_UNKNOWN_LINUX_MUSLABI64_RUSTFLAGS='-C target-features=+crt-static'
+
 # Expect our source code to live in /home/rust/src
 WORKDIR /home/rust/src
