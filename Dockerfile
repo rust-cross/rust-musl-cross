@@ -103,6 +103,7 @@ RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 # Build std sysroot for targets that doesn't have official std release
 ADD Xargo.toml /tmp/Xargo.toml
 ADD build-std.sh .
+COPY compile-libunwind /tmp/compile-libunwind
 RUN bash build-std.sh
 
 ENV RUSTUP_HOME=/root/.rustup
