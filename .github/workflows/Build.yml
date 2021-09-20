@@ -158,7 +158,7 @@ jobs:
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
-            messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build; cargo clean"
+            messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
       - name: Build and push multiarch image
         if: github.ref == 'refs/heads/master'
         run: |
