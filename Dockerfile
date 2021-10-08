@@ -30,8 +30,8 @@ RUN apt-get update && \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install cross-signed Let's Encrypt R3 CA certificate
-COPY lets-encrypt-r3-cross-signed.crt /usr/local/share/ca-certificates
+# Install Let's Encrypt R3 CA certificate from https://letsencrypt.org/certificates/
+COPY lets-encrypt-r3.crt /usr/local/share/ca-certificates
 RUN update-ca-certificates
 
 ARG TARGET=x86_64-unknown-linux-musl
