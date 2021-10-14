@@ -103,7 +103,7 @@ jobs:
           - IMAGE_TAG: powerpc64le-musl
             TARGET: powerpc64le-unknown-linux-musl
             RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: nightly-2021-08-28
+            TOOLCHAIN: nightly
           # - IMAGE_TAG: s390x-musl
           #   TARGET: s390x-unknown-linux-musl
           #   RUST_MUSL_MAKE_CONFIG: config.mak
