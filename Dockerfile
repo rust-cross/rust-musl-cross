@@ -60,6 +60,8 @@ RUN mkdir -p /home/rust/libs /home/rust/src
 ENV PATH=/root/.cargo/bin:/usr/local/musl/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ENV TARGET_CC=$TARGET-gcc
 ENV TARGET_CXX=$TARGET-g++
+ENV TARGET_AR=$TARGET-ar
+ENV TARGET_RANLIB=$TARGET-ranlib
 ENV TARGET_HOME=/usr/local/musl/$TARGET
 ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 
@@ -69,9 +71,11 @@ WORKDIR /home/rust/libs
 
 RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
+    export AR=$TARGET_AR && \
+    export RANLIB=$TARGET_RANLIB && \
     echo "Building zlib" && \
-    VERS=1.2.11 && \
-    CHECKSUM=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1 && \
+    VERS=1.2.12 && \
+    CHECKSUM=91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9 && \
     cd /home/rust/libs && \
     curl -sqLO https://zlib.net/zlib-$VERS.tar.gz && \
     echo "$CHECKSUM zlib-$VERS.tar.gz" > checksums.txt && \
