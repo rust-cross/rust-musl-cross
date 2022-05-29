@@ -81,7 +81,7 @@ RUN export CC=$TARGET_CC && \
     echo "$CHECKSUM zlib-$VERS.tar.gz" > checksums.txt && \
     sha256sum -c checksums.txt && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
-    ./configure --static --archs="-fPIC" --prefix=$TARGET_HOME && \
+    CFLAGS="-O3 -fPIC" ./configure --static --prefix=$TARGET_HOME && \
     make -j$(nproc) && make install && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt
 
