@@ -28,7 +28,7 @@ jobs:
         uses: messense/huaweicloud-github-runner@main
         with:
           mode: start
-          count: 14
+          count: 7
           github-token: ${{ secrets.GH_PAT }}
           huawei-cloud-ak: ${{ secrets.HUAWEI_CLOUD_AK }}
           huawei-cloud-sk: ${{ secrets.HUAWEI_CLOUD_SK }}
