@@ -16,6 +16,7 @@ name: Build
 
 jobs:
   start-runner:
+    if: github.repository_owner == 'messense'
     name: Start self-hosted ECS runner
     runs-on: ubuntu-latest
     outputs:
@@ -42,13 +43,150 @@ jobs:
 
   build:
     name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
-    needs: start-runner
     runs-on: ${{ matrix.os.label }}
     strategy:
       matrix:
         os:
           - arch: 'amd64'
             label: ['ubuntu-latest']
+        env:
+          - IMAGE_TAG: aarch64-musl
+            TARGET: aarch64-unknown-linux-musl
+            RUST_MUSL_MAKE_CONFIG: config.mak
+            TOOLCHAIN: stable
+          - IMAGE_TAG: arm-musleabi
+            TARGET: arm-unknown-linux-musleabi
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: arm-musleabihf
+            TARGET: arm-unknown-linux-musleabihf
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: armv5te-musleabi
+            TARGET: armv5te-unknown-linux-musleabi
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: armv7-musleabi
+            TARGET: armv7-unknown-linux-musleabi
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: armv7-musleabihf
+            TARGET: armv7-unknown-linux-musleabihf
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: i586-musl
+            TARGET: i586-unknown-linux-musl
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: i686-musl
+            TARGET: i686-unknown-linux-musl
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: mips-musl
+            TARGET: mips-unknown-linux-musl
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: mips64-muslabi64
+            TARGET: mips64-unknown-linux-muslabi64
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: mips64el-muslabi64
+            TARGET: mips64el-unknown-linux-muslabi64
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: mipsel-musl
+            TARGET: mipsel-unknown-linux-musl
+            RUST_MUSL_MAKE_CONFIG: config.mak.32
+            TOOLCHAIN: stable
+          - IMAGE_TAG: powerpc64le-musl
+            TARGET: powerpc64le-unknown-linux-musl
+            RUST_MUSL_MAKE_CONFIG: config.mak
+            TOOLCHAIN: nightly
+          # - IMAGE_TAG: s390x-musl
+          #   TARGET: s390x-unknown-linux-musl
+          #   RUST_MUSL_MAKE_CONFIG: config.mak
+          #   TOOLCHAIN: nightly
+          - IMAGE_TAG: x86_64-musl
+            TARGET: x86_64-unknown-linux-musl
+            RUST_MUSL_MAKE_CONFIG: config.mak
+            TOOLCHAIN: stable
+    env: ${{ matrix.env }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.env.TARGET }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.env.TARGET }}-buildx-
+      - name: Clean Docker cache
+        if: ${{ contains(github.event.head_commit.message, '[clean cache]') || github.event.inputs.clean_cache == 'yes' }}
+        continue-on-error: true
+        run: |
+          rm -rf /tmp/.buildx-cache
+      - name: docker build
+        uses: docker/build-push-action@v2
+        with:
+          platforms: linux/${{ matrix.os.arch }}
+          build-args: |
+            TARGET=${{ matrix.env.TARGET }}
+            RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
+            TOOLCHAIN=${{ matrix.env.TOOLCHAIN }}
+          tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
+          load: true
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+      - name: Move cache
+        run: |
+          # Temp fix
+          # https://github.com/docker/build-push-action/issues/252
+          # https://github.com/moby/buildkit/issues/1896
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - name: Test Docker cargo build
+        if: ${{ !startsWith(matrix.env.TARGET, 'armv5te') }}
+        run: |
+          docker run --rm \
+            -v "$(pwd)/tests":/home/rust/src \
+            messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
+      - name: Build and push multiarch image
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker push messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
+
+          echo "image: messense/rust-musl-cross:$IMAGE_TAG
+          manifests:
+            - image: messense/rust-musl-cross:$IMAGE_TAG-amd64
+              platform:
+                architecture: amd64
+                os: linux
+            - image: messense/rust-musl-cross:$IMAGE_TAG-arm64
+              platform:
+                architecture: arm64
+                os: linux
+          " > manifest.yaml
+
+          curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-${{ matrix.os.arch }}
+          chmod +x manifest-tool
+          ./manifest-tool push from-spec manifest.yaml
+
+  build-arm64:
+    if: github.repository_owner == 'messense'
+    name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
+    needs: start-runner
+    runs-on: ${{ matrix.os.label }}
+    strategy:
+      matrix:
+        os:
           - arch: 'arm64'
             label: ['self-hosted', 'huaweicloud']
         env:
