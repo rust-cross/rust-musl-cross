@@ -321,7 +321,7 @@ jobs:
 
   stop-runner:
     name: Stop self-hosted ECS runner
-    needs: [start-runner, build]
+    needs: [start-runner, build-arm64]
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
