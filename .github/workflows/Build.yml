@@ -329,13 +329,6 @@ jobs:
           chmod +x manifest-tool
           ./manifest-tool push from-spec manifest.yaml
 
-          sudo apt-get update
-          sudo apt-get -y install skopeo
-          skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
-          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
-          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
-
   stop-runner:
     name: Stop self-hosted ECS runner
     needs: [start-runner, build-arm64]
