@@ -161,6 +161,7 @@ jobs:
       - name: Build and push multiarch image
         if: ${{ github.ref == 'refs/heads/master' && github.repository_owner == 'messense' }}
         run: |
+          set -e
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker push messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
 
@@ -179,6 +180,13 @@ jobs:
           curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-${{ matrix.os.arch }}
           chmod +x manifest-tool
           ./manifest-tool push from-spec manifest.yaml
+
+          sudo apt-get update
+          sudo apt-get -y install skopeo
+          skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
+          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
 
   build-arm64:
     if: github.repository_owner == 'messense'
@@ -301,6 +309,7 @@ jobs:
       - name: Build and push multiarch image
         if: github.ref == 'refs/heads/master'
         run: |
+          set -e
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker push messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
 
@@ -319,6 +328,13 @@ jobs:
           curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-${{ matrix.os.arch }}
           chmod +x manifest-tool
           ./manifest-tool push from-spec manifest.yaml
+
+          sudo apt-get update
+          sudo apt-get -y install skopeo
+          skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
+          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
 
   stop-runner:
     name: Stop self-hosted ECS runner
