@@ -170,7 +170,6 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' && github.repository_owner == 'messense' }}
         run: |
           set -e
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker push messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
 
           echo "image: messense/rust-musl-cross:$IMAGE_TAG
@@ -329,7 +328,6 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           set -e
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker push messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
 
           echo "image: messense/rust-musl-cross:$IMAGE_TAG
