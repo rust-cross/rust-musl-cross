@@ -187,7 +187,7 @@ jobs:
           skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
           skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG-amd64 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
           skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG-arm64 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
+          skopeo copy --multi-arch index-only docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
 
   build-arm64:
     if: ${{ github.repository_owner == 'messense' && !contains(github.event.head_commit.message, 'skip arm64') }}
