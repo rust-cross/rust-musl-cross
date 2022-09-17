@@ -123,7 +123,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
-        if: github.repository_owner == 'messense'
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -149,7 +148,7 @@ jobs:
             TARGET=${{ matrix.env.TARGET }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
             TOOLCHAIN=${{ matrix.env.TOOLCHAIN }}
-          tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
+          tags: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
@@ -165,46 +164,52 @@ jobs:
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
-            messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
+            ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
       - name: Build and push multiarch image
-        if: ${{ github.ref == 'refs/heads/master' && github.repository_owner == 'messense' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           set -e
-          docker push messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
-
-          echo "image: messense/rust-musl-cross:$IMAGE_TAG
-          manifests:
-            - image: messense/rust-musl-cross:$IMAGE_TAG-amd64
-              platform:
-                architecture: amd64
-                os: linux
-            - image: messense/rust-musl-cross:$IMAGE_TAG-arm64
-              platform:
-                architecture: arm64
-                os: linux
-          " > manifest.yaml
+          docker push ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
 
           curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-${{ matrix.os.arch }}
           chmod +x manifest-tool
-          ./manifest-tool push from-spec manifest.yaml
 
-          sudo apt-get update
-          sudo apt-get -y install skopeo
-          skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
-          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG-amd64 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
-          skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG-arm64 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-          echo "image: ghcr.io/messense/rust-musl-cross:$IMAGE_TAG
+          echo "image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
           manifests:
-            - image: ghcr.io/messense/rust-musl-cross:$IMAGE_TAG-amd64
+            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
               platform:
                 architecture: amd64
                 os: linux
-            - image: ghcr.io/messense/rust-musl-cross:$IMAGE_TAG-arm64
+            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
               platform:
                 architecture: arm64
                 os: linux
           " > ghcr-manifest.yaml
           ./manifest-tool push from-spec ghcr-manifest.yaml
+      - name: Sync images to Docker Hub
+        if: ${{ github.ref == 'refs/heads/master' && github.repository_owner == 'messense' }}
+        run: |
+          set -e
+          sudo apt-get update
+          sudo apt-get -y install skopeo
+          skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
+          skopeo login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
+          skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+          skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+
+          echo "image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
+          manifests:
+            - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+              platform:
+                architecture: amd64
+                os: linux
+            - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+              platform:
+                architecture: arm64
+                os: linux
+          " > dockerhub-manifest.yaml
+
+          ./manifest-tool push from-spec dockerhub-manifest.yaml
 
   build-arm64:
     if: ${{ github.repository_owner == 'messense' && !contains(github.event.head_commit.message, 'skip arm64') }}
@@ -287,6 +292,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
@@ -307,7 +318,7 @@ jobs:
             TARGET=${{ matrix.env.TARGET }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
             TOOLCHAIN=${{ matrix.env.TOOLCHAIN }}
-          tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
+          tags: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
@@ -323,28 +334,28 @@ jobs:
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
-            messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
+            ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
       - name: Build and push multiarch image
-        if: github.ref == 'refs/heads/master'
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           set -e
-          docker push messense/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
-
-          echo "image: messense/rust-musl-cross:$IMAGE_TAG
-          manifests:
-            - image: messense/rust-musl-cross:$IMAGE_TAG-amd64
-              platform:
-                architecture: amd64
-                os: linux
-            - image: messense/rust-musl-cross:$IMAGE_TAG-arm64
-              platform:
-                architecture: arm64
-                os: linux
-          " > manifest.yaml
+          docker push ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
 
           curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-${{ matrix.os.arch }}
           chmod +x manifest-tool
-          ./manifest-tool push from-spec manifest.yaml
+
+          echo "image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
+          manifests:
+            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+              platform:
+                architecture: amd64
+                os: linux
+            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+              platform:
+                architecture: arm64
+                os: linux
+          " > ghcr-manifest.yaml
+          ./manifest-tool push from-spec ghcr-manifest.yaml
 
   stop-runner:
     name: Stop self-hosted ECS runner
