@@ -16,7 +16,7 @@ name: Build
 
 jobs:
   start-runner:
-    if: ${{ github.repository_owner == 'messense' && !contains(github.event.head_commit.message, '[skip arm64]') }}
+    if: ${{ github.repository_owner == 'messense' && !contains(github.event.head_commit.message, 'skip arm64') }}
     name: Start self-hosted ECS runner
     runs-on: ubuntu-latest
     outputs:
@@ -41,7 +41,8 @@ jobs:
           subnet-id: ${{ secrets.SUBNET_ID }}
           security-group-id: ${{ secrets.SECURITY_GROUP_ID }}
 
-  build:
+  build-amd64:
+    if: ${{ !contains(github.event.head_commit.message, 'skip amd64') }}
     name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
     runs-on: ${{ matrix.os.label }}
     strategy:
@@ -189,7 +190,7 @@ jobs:
           skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
 
   build-arm64:
-    if: ${{ github.repository_owner == 'messense' && !contains(github.event.head_commit.message, '[skip arm64]') }}
+    if: ${{ github.repository_owner == 'messense' && !contains(github.event.head_commit.message, 'skip arm64') }}
     name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
     needs: start-runner
     runs-on: ${{ matrix.os.label }}
