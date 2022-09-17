@@ -34,6 +34,8 @@ To use `armv7-unknown-linux-musleabihf` target for example, first pull the image
 
 ```bash
 docker pull messense/rust-musl-cross:armv7-musleabihf
+# Also available on ghcr.io
+# docker pull ghcr.io/messense/rust-musl-cross:armv7-musleabihf
 ```
 
 Then you can do:
