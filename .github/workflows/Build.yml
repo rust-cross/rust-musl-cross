@@ -122,6 +122,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to GitHub Container Registry
+        if: github.repository_owner == 'messense'
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Docker layers
         uses: actions/cache@v2
         with:
@@ -187,7 +194,18 @@ jobs:
           skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
           skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG-amd64 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
           skopeo copy docker://messense/rust-musl-cross:$IMAGE_TAG-arm64 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-          skopeo copy --multi-arch index-only docker://messense/rust-musl-cross:$IMAGE_TAG docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
+          echo "image: ghcr.io/messense/rust-musl-cross:$IMAGE_TAG
+          manifests:
+            - image: ghcr.io/messense/rust-musl-cross:$IMAGE_TAG-amd64
+              platform:
+                architecture: amd64
+                os: linux
+            - image: ghcr.io/messense/rust-musl-cross:$IMAGE_TAG-arm64
+              platform:
+                architecture: arm64
+                os: linux
+          " > ghcr-manifest.yaml
+          ./manifest-tool push from-spec ghcr-manifest.yaml
 
   build-arm64:
     if: ${{ github.repository_owner == 'messense' && !contains(github.event.head_commit.message, 'skip arm64') }}
