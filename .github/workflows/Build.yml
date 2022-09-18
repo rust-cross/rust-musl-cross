@@ -74,10 +74,11 @@ jobs:
                 core.setOutput('arch', JSON.stringify(outputArchMatrix))
               }
             } else if (context.eventName == 'push') {
-              const commitMessage = process.env.COMMIT_MESSAGE
-              if (commitMessage) {
-                const outputArchMatrix = []
-                const outputTargetMatrix = []
+              const commitMessage = process.env.COMMIT_MESSAGE.trim()
+              if (commitMessage.length > 0) {
+                let outputArchMatrix = []
+                let outputTargetMatrix = []
+
                 const borsArgs = commitMessage.replace(/Try #[0-9]+:/i, '').trim()
                 const targetIndex = borsArgs.indexOf('--target')
                 let dockerArch = []
@@ -229,7 +230,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
   conclusion:
-    needs: [ build ]
+    needs: [setup, build]
     if: always()
     runs-on: ubuntu-latest
     steps:
