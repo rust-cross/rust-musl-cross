@@ -1,4 +1,10 @@
 on:
+  push:
+    branches:
+      # for bors r+
+      - staging
+      # for bors try
+      - trying
   pull_request:
   workflow_dispatch:
     inputs:
@@ -21,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       arch: ${{ steps.generate-matrix.outputs.arch }}
+      target: ${{ steps.generate-matrix.outputs.target }}
       run-build: ${{ steps.generate-matrix.outputs.run-build }}
     steps:
       - uses: actions/setup-node@v2
@@ -34,10 +41,13 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const yaml = require('js-yaml')
-            const matrix = yaml.load(process.env.ARCH_MATRIX)
+            const archMatrix = yaml.load(process.env.ARCH_MATRIX)
+            const targetMatrix = yaml.load(process.env.TARGET_MATRIX)
+
             if (context.eventName == 'schedule' || context.eventName == 'workflow_dispatch') {
               // Always run on schedule or workflow_dispatch
-              core.setOutput('arch', JSON.stringify(matrix))
+              core.setOutput('arch', JSON.stringify(archMatrix))
+              core.setOutput('target', JSON.stringify(targetMatrix))
             } else if (context.eventName == 'pull_request') {
               const { data: { labels: labels } } = await github.rest.pulls.get({
                 owner: context.repo.owner,
@@ -45,37 +55,149 @@ jobs:
                 pull_number: context.issue.number
               })
               const label_names = labels.map(label => label.name)
-              const outputMatrix = []
+              const outputArchMatrix = []
               if (label_names.includes('build-amd64')) {
-                outputMatrix.push(...matrix.filter(item => item.arch == 'amd64'))
+                outputArchMatrix.push(...archMatrix.filter(item => item.arch == 'amd64'))
               }
               if (label_names.includes('build-arm64')) {
-                outputMatrix.push(...matrix.filter(item => item.arch == 'arm64'))
+                outputArchMatrix.push(...archMatrix.filter(item => item.arch == 'arm64'))
               }
               if (label_names.includes('build-armv7')) {
-                outputMatrix.push(...matrix.filter(item => item.arch == 'armv7'))
+                outputArchMatrix.push(...archMatrix.filter(item => item.arch == 'armv7'))
               }
 
-              if (outputMatrix.length == 0) {
-                core.setOutput('arch', JSON.stringify(matrix))
+              if (outputArchMatrix.length === 0) {
+                core.setOutput('arch', JSON.stringify(archMatrix))
+                core.setOutput('target', JSON.stringify(targetMatrix))
                 core.setOutput('run-build', 'false')
               } else {
-                core.setOutput('arch', JSON.stringify(outputMatrix))
+                core.setOutput('arch', JSON.stringify(outputArchMatrix))
+              }
+            } else if (context.eventName == 'push') {
+              const commitMessage = process.env.COMMIT_MESSAGE
+              if (commitMessage) {
+                const outputArchMatrix = []
+                const outputTargetMatrix = []
+                const borsArgs = commitMessage.replace(/Try #[0-9]+:/i, '').trim()
+                const targetIndex = borsArgs.indexOf('--target')
+                let dockerArch = []
+                let targets = []
+
+                if (targetIndex === -1) {
+                  dockerArch = borsArgs.trim().split(' ')
+                  targets = []
+                } else {
+                  dockerArch = borsArgs.substring(0, targetIndex).trim().split(' ')
+                  targets = borsArgs.substring(targetIndex + '--target'.length).trim().split(' ')
+                }
+                if (dockerArch.length === 0) {
+                  // Defaults to all arches
+                  outputArchMatrix = archMatrix
+                } else {
+                  for (const arch of dockerArch) {
+                    outputArchMatrix.push(...archMatrix.filter(item => item.arch == arch))
+                  }
+                }
+                if (targets.length === 0) {
+                  // Defaults to all targets
+                  outputTargetMatrix = targetMatrix
+                } else {
+                  for (const target of targets) {
+                    outputTargetMatrix.push(...targetMatrix.filter(item => item.TARGET == target))
+                  }
+                }
+
+                core.setOutput('arch', JSON.stringify(outputArchMatrix))
+                core.setOutput('target', JSON.stringify(outputTargetMatrix))
+              } else {
+                core.setOutput('arch', JSON.stringify(archMatrix))
+                core.setOutput('target', JSON.stringify(targetMatrix))
+                core.setOutput('run-build', 'false')
               }
             } else {
-              core.setOutput('arch', JSON.stringify(matrix))
+              core.setOutput('arch', JSON.stringify(archMatrix))
+              core.setOutput('target', JSON.stringify(targetMatrix))
               core.setOutput('run-build', 'false')
             }
       - name: Show build matrix
         run: |
-          echo ${{ steps.generate-matrix.outputs.arch }}
+          echo '${{ toJson(steps.generate-matrix.outputs.arch) }}'
+          echo '${{ toJson(steps.generate-matrix.outputs.target) }}'
           echo Run build: ${{ steps.generate-matrix.outputs.run-build || 'true' }}
     env:
+      COMMIT_MESSAGE: >
+        ${{
+            ((
+              startsWith(github.event.head_commit.message, 'Try #') &&
+              github.event.head_commit.author.username == 'bors[bot]'
+            ) && github.event.head_commit.message) || ''
+          }}
       ARCH_MATRIX: |
         - arch: amd64
         - arch: arm64
         - arch: armv7
           docker_arch: arm/v7
+      TARGET_MATRIX: |
+        - IMAGE_TAG: aarch64-musl
+          TARGET: aarch64-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: stable
+        - IMAGE_TAG: arm-musleabi
+          TARGET: arm-unknown-linux-musleabi
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: arm-musleabihf
+          TARGET: arm-unknown-linux-musleabihf
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: armv5te-musleabi
+          TARGET: armv5te-unknown-linux-musleabi
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: armv7-musleabi
+          TARGET: armv7-unknown-linux-musleabi
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: armv7-musleabihf
+          TARGET: armv7-unknown-linux-musleabihf
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: i586-musl
+          TARGET: i586-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: i686-musl
+          TARGET: i686-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: mips-musl
+          TARGET: mips-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: mips64-muslabi64
+          TARGET: mips64-unknown-linux-muslabi64
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: mips64el-muslabi64
+          TARGET: mips64el-unknown-linux-muslabi64
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: mipsel-musl
+          TARGET: mipsel-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          TOOLCHAIN: stable
+        - IMAGE_TAG: powerpc64le-musl
+          TARGET: powerpc64le-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: nightly
+        # - IMAGE_TAG: s390x-musl
+        #   TARGET: s390x-unknown-linux-musl
+        #   RUST_MUSL_MAKE_CONFIG: config.mak
+        #   TOOLCHAIN: nightly
+        - IMAGE_TAG: x86_64-musl
+          TARGET: x86_64-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: stable
 
   build:
     name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
@@ -85,67 +207,7 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJson(needs.setup.outputs.arch) }}
-        env:
-          - IMAGE_TAG: aarch64-musl
-            TARGET: aarch64-unknown-linux-musl
-            RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: stable
-          - IMAGE_TAG: arm-musleabi
-            TARGET: arm-unknown-linux-musleabi
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: arm-musleabihf
-            TARGET: arm-unknown-linux-musleabihf
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: armv5te-musleabi
-            TARGET: armv5te-unknown-linux-musleabi
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: armv7-musleabi
-            TARGET: armv7-unknown-linux-musleabi
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: armv7-musleabihf
-            TARGET: armv7-unknown-linux-musleabihf
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: i586-musl
-            TARGET: i586-unknown-linux-musl
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: i686-musl
-            TARGET: i686-unknown-linux-musl
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: mips-musl
-            TARGET: mips-unknown-linux-musl
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: mips64-muslabi64
-            TARGET: mips64-unknown-linux-muslabi64
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: mips64el-muslabi64
-            TARGET: mips64el-unknown-linux-muslabi64
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: mipsel-musl
-            TARGET: mipsel-unknown-linux-musl
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: powerpc64le-musl
-            TARGET: powerpc64le-unknown-linux-musl
-            RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: nightly
-          # - IMAGE_TAG: s390x-musl
-          #   TARGET: s390x-unknown-linux-musl
-          #   RUST_MUSL_MAKE_CONFIG: config.mak
-          #   TOOLCHAIN: nightly
-          - IMAGE_TAG: x86_64-musl
-            TARGET: x86_64-unknown-linux-musl
-            RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: stable
+        env: ${{ fromJson(needs.setup.outputs.target) }}
     env: ${{ matrix.env }}
     steps:
       - uses: actions/checkout@v2
@@ -165,75 +227,16 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: docker build
-        uses: docker/build-push-action@v2
-        with:
-          platforms: linux/${{ matrix.os.docker_arch || matrix.os.arch }}
-          build-args: |
-            TARGET=${{ matrix.env.TARGET }}
-            RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
-            TOOLCHAIN=${{ github.event.inputs.toolchain || matrix.env.TOOLCHAIN }}
-          tags: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
-          no-cache: ${{ github.event.inputs.no_cache == 'yes' }}
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Test Docker cargo build
-        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') }}
+
+  conclusion:
+    needs: [ build ]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Result
         run: |
-          docker run --rm \
-            -v "$(pwd)/tests":/home/rust/src \
-            ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
-      - name: Build and push multiarch image
-        run: |
-          set -e
-
-          docker push ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }}
-          curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-${{ matrix.os.arch }}
-          chmod +x manifest-tool
-
-          echo "image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
-          manifests:
-            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
-              platform:
-                architecture: amd64
-                os: linux
-            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-              platform:
-                architecture: arm64
-                os: linux
-            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
-              platform:
-                architecture: arm/v7
-                os: linux
-          " > ghcr-manifest.yaml
-          ./manifest-tool push from-spec ghcr-manifest.yaml || exit 0
-      - name: Sync images to Docker Hub
-        if: ${{ github.repository_owner == 'messense' }}
-        run: |
-          set -e
-          sudo apt-get update
-          sudo apt-get -y install skopeo
-          skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
-          skopeo login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
-          skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
-          skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-          skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
-
-          echo "image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
-          manifests:
-            - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
-              platform:
-                architecture: amd64
-                os: linux
-            - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-              platform:
-                architecture: arm64
-                os: linux
-            - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
-              platform:
-                architecture: arm/v7
-                os: linux
-          " > dockerhub-manifest.yaml
-
-          ./manifest-tool push from-spec dockerhub-manifest.yaml
+          jq -C <<< "${needs}"
+          # Check if all needs were successful or skipped.
+          "$(jq -r 'all(.result as $result | (["success", "skipped"] | contains([$result])))' <<< "${needs}")"
+        env:
+          needs: ${{ toJson(needs) }}
