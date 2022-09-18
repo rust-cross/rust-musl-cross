@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      no_cache:
+        description: Disable Docker cache, yes/no
+        default: 'no'
+        required: false
       toolchain:
         description: Rust toolchain to install
         default: 'stable'
@@ -114,6 +118,7 @@ jobs:
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
             TOOLCHAIN=${{ github.event.inputs.toolchain || matrix.env.TOOLCHAIN }}
           tags: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
+          no-cache: ${{ github.event.inputs.no_cache == 'yes' }}
           load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
