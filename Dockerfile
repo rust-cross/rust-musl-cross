@@ -65,6 +65,12 @@ ENV TARGET_RANLIB=$TARGET-ranlib
 ENV TARGET_HOME=/usr/local/musl/$TARGET
 ENV TARGET_C_INCLUDE_PATH=$TARGET_HOME/include/
 
+# pkg-config cross compilation support
+ENV TARGET_PKG_CONFIG_ALLOW_CROSS=1
+ENV TARGET_PKG_CONFIG_SYSROOT_DIR=$TARGET_HOME
+ENV TARGET_PKG_CONFIG_PATH=$TARGET_HOME/lib/pkgconfig:/usr/local/musl/lib/pkgconfig
+ENV TARGET_PKG_CONFIG_LIBDIR=$TARGET_PKG_CONFIG_PATH
+
 # We'll build our libraries in subdirectories of /home/rust/libs.  Please
 # clean up when you're done.
 WORKDIR /home/rust/libs
