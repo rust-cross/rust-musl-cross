@@ -16,16 +16,75 @@ on:
 name: Build
 
 jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      arch: ${{ steps.generate-matrix.outputs.arch }}
+      run-build: ${{ steps.generate-matrix.outputs.run-build }}
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+      - run: npm install js-yaml
+      - name: Generate matrix
+        id: generate-matrix
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const yaml = require('js-yaml')
+            const matrix = yaml.load(process.env.ARCH_MATRIX)
+            if (context.eventName == 'schedule' || context.eventName == 'workflow_dispatch') {
+              // Always run on schedule or workflow_dispatch
+              core.setOutput('arch', JSON.stringify(matrix))
+            } else if (context.eventName == 'pull_request') {
+              const { data: { labels: labels } } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+              })
+              const label_names = labels.map(label => label.name)
+              const outputMatrix = []
+              if (label_names.includes('build-amd64')) {
+                outputMatrix.push(...matrix.filter(item => item.arch == 'amd64'))
+              }
+              if (label_names.includes('build-arm64')) {
+                outputMatrix.push(...matrix.filter(item => item.arch == 'arm64'))
+              }
+              if (label_names.includes('build-armv7')) {
+                outputMatrix.push(...matrix.filter(item => item.arch == 'armv7'))
+              }
+
+              if (outputMatrix.length == 0) {
+                core.setOutput('arch', JSON.stringify(matrix))
+                core.setOutput('run-build', 'false')
+              } else {
+                core.setOutput('arch', JSON.stringify(outputMatrix))
+              }
+            } else {
+              core.setOutput('arch', JSON.stringify(matrix))
+              core.setOutput('run-build', 'false')
+            }
+      - name: Show build matrix
+        run: |
+          echo ${{ steps.generate-matrix.outputs.arch }}
+          echo Run build: ${{ steps.generate-matrix.outputs.run-build || 'true' }}
+    env:
+      ARCH_MATRIX: |
+        - arch: amd64
+        - arch: arm64
+        - arch: armv7
+          docker_arch: arm/v7
+
   build:
     name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
     runs-on: ubuntu-latest
+    if: ${{ needs.setup.outputs.run-build != 'false' }}
+    needs: setup
     strategy:
       matrix:
-        os:
-          - arch: 'amd64'
-          - arch: 'arm64'
-          - arch: 'armv7'
-            docker_arch: 'arm/v7'
+        os: ${{ fromJson(needs.setup.outputs.arch) }}
         env:
           - IMAGE_TAG: aarch64-musl
             TARGET: aarch64-unknown-linux-musl
@@ -88,64 +147,25 @@ jobs:
             RUST_MUSL_MAKE_CONFIG: config.mak
             TOOLCHAIN: stable
     env: ${{ matrix.env }}
-    outputs:
-      run: ${{ steps.should-run.outputs.run }}
     steps:
       - uses: actions/checkout@v2
-      - name: Determine skip or not
-        id: should-run
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            // Always run on schedule or workflow_dispatch
-            if (context.eventName == 'schedule' || context.eventName == 'workflow_dispatch') {
-              core.setOutput('run', 'true')
-            } else if (context.eventName == 'pull_request') {
-              const { data: { labels: labels } } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number
-              })
-              const label_names = labels.map(label => label.name)
-              if (label_names.includes('build-amd64') && '${{ matrix.os.arch }}' == 'amd64') {
-                core.setOutput('run', 'true')
-              } else if (label_names.includes('build-arm64') && '${{ matrix.os.arch }}' == 'arm64') {
-                core.setOutput('run', 'true')
-              } else if (label_names.includes('build-armv7') && '${{ matrix.os.arch }}' == 'armv7') {
-                core.setOutput('run', 'true')
-              }
-              if (label_names.includes('skip-amd64') && '${{ matrix.os.arch }}' == 'amd64') {
-                core.setOutput('run', '')
-              } else if (label_names.includes('skip-arm64') && '${{ matrix.os.arch }}' == 'arm64') {
-                core.setOutput('run', '')
-              } else if (label_names.includes('skip-armv7') && '${{ matrix.os.arch }}' == 'armv7') {
-                core.setOutput('run', '')
-              }
-            } else {
-              core.setOutput('run', '')
-            }
       - name: Setup QEMU
-        if: ${{ steps.should-run.outputs.run }}
         uses: dbhi/qus/action@main
       - name: Setup Docker Buildx
-        if: ${{ steps.should-run.outputs.run }}
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
-        if: ${{ steps.should-run.outputs.run && github.repository_owner == 'messense' }}
+        if: ${{ github.repository_owner == 'messense' }}
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
-        if: ${{ steps.should-run.outputs.run }}
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: docker build
-        if: ${{ steps.should-run.outputs.run }}
         uses: docker/build-push-action@v2
         with:
           platforms: linux/${{ matrix.os.docker_arch || matrix.os.arch }}
@@ -159,13 +179,12 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Test Docker cargo build
-        if: ${{ steps.should-run.outputs.run && matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') }}
+        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') }}
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
             ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
       - name: Build and push multiarch image
-        if: ${{ steps.should-run.outputs.run }}
         run: |
           set -e
 
@@ -190,7 +209,7 @@ jobs:
           " > ghcr-manifest.yaml
           ./manifest-tool push from-spec ghcr-manifest.yaml || exit 0
       - name: Sync images to Docker Hub
-        if: ${{ steps.should-run.outputs.run && github.repository_owner == 'messense' }}
+        if: ${{ github.repository_owner == 'messense' }}
         run: |
           set -e
           sudo apt-get update
