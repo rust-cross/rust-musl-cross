@@ -5,9 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      clean_cache:
-        description: Clean Docker cache before build, yes/no
-        default: 'no'
+      toolchain:
+        description: Rust toolchain to install
+        default: 'stable'
         required: false
   schedule:
     - cron: '0 0 1 */2 *'
@@ -105,18 +105,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.env.TARGET }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.os.arch }}-${{ matrix.env.TARGET }}-buildx-
-      - name: Clean Docker cache
-        if: ${{ contains(github.event.head_commit.message, '[clean cache]') || github.event.inputs.clean_cache == 'yes' }}
-        continue-on-error: true
-        run: |
-          rm -rf /tmp/.buildx-cache
       - name: docker build
         uses: docker/build-push-action@v2
         with:
@@ -124,18 +112,11 @@ jobs:
           build-args: |
             TARGET=${{ matrix.env.TARGET }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
-            TOOLCHAIN=${{ matrix.env.TOOLCHAIN }}
+            TOOLCHAIN=${{ github.event.inputs.toolchain || matrix.env.TOOLCHAIN }}
           tags: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           load: true
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
-      - name: Move cache
-        run: |
-          # Temp fix
-          # https://github.com/docker/build-push-action/issues/252
-          # https://github.com/moby/buildkit/issues/1896
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Test Docker cargo build
         if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') }}
         run: |
