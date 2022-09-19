@@ -5,7 +5,6 @@ on:
       - staging
       # for bors try
       - trying
-  pull_request:
   workflow_dispatch:
     inputs:
       no_cache:
@@ -48,38 +47,32 @@ jobs:
               // Always run on schedule or workflow_dispatch
               core.setOutput('arch', JSON.stringify(archMatrix))
               core.setOutput('target', JSON.stringify(targetMatrix))
-            } else if (context.eventName == 'pull_request') {
-              const { data: { labels: labels } } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number
-              })
-              const label_names = labels.map(label => label.name)
-              const outputArchMatrix = []
-              if (label_names.includes('build-amd64')) {
-                outputArchMatrix.push(...archMatrix.filter(item => item.arch == 'amd64'))
-              }
-              if (label_names.includes('build-arm64')) {
-                outputArchMatrix.push(...archMatrix.filter(item => item.arch == 'arm64'))
-              }
-              if (label_names.includes('build-armv7')) {
-                outputArchMatrix.push(...archMatrix.filter(item => item.arch == 'armv7'))
-              }
-
-              if (outputArchMatrix.length === 0) {
-                core.setOutput('arch', JSON.stringify(archMatrix))
-                core.setOutput('target', JSON.stringify(targetMatrix))
-                core.setOutput('run-build', 'false')
-              } else {
-                core.setOutput('arch', JSON.stringify(outputArchMatrix))
-              }
             } else if (context.eventName == 'push') {
               const commitMessage = process.env.COMMIT_MESSAGE.trim()
               if (commitMessage.length > 0) {
                 let outputArchMatrix = []
                 let outputTargetMatrix = []
 
-                const borsArgs = commitMessage.replace(/Try #[0-9]+:/i, '').trim()
+                let borsArgs
+                if (commitMessage.startsWith('Try #')) {
+                  borsArgs = commitMessage.replace(/Try #[0-9]+:/i, '').trim()
+                } else {
+                  // Merge example commit message:
+                  // Merge #64
+                  //
+                  // 64: Refine bors command r=messense a=messense
+                  //
+                  // amd64 --target aarch64
+                  //
+                  // Co-authored-by: messense <messense@icloud.com>
+                  //
+                  borsArgs = commitMessage
+                    .split('\n')
+                    .slice(4)
+                    .filter(item => item.trim().length > 0 && !item.trim().startsWith('Co-authored-by:'))
+                    .join('\n')
+                    .trim()
+                }
                 const targetIndex = borsArgs.indexOf('--target')
                 let dockerArch = []
                 let targets = []
@@ -104,7 +97,7 @@ jobs:
                   outputTargetMatrix = targetMatrix
                 } else {
                   for (const target of targets) {
-                    outputTargetMatrix.push(...targetMatrix.filter(item => item.TARGET == target))
+                    outputTargetMatrix.push(...targetMatrix.filter(item => item.TARGET.startsWith(target)))
                   }
                 }
 
@@ -129,7 +122,7 @@ jobs:
       COMMIT_MESSAGE: >
         ${{
             ((
-              startsWith(github.event.head_commit.message, 'Try #') &&
+              (startsWith(github.event.head_commit.message, 'Try #') || startsWith(github.event.head_commit.message, 'Merge #')) &&
               github.event.head_commit.author.username == 'bors[bot]'
             ) && github.event.head_commit.message) || ''
           }}

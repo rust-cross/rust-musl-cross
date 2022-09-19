@@ -2,6 +2,7 @@
 
 [![Docker Image](https://img.shields.io/docker/pulls/messense/rust-musl-cross.svg?maxAge=2592000)](https://hub.docker.com/r/messense/rust-musl-cross/)
 [![Build](https://github.com/messense/rust-musl-cross/workflows/Build/badge.svg)](https://github.com/messense/rust-musl-cross/actions?query=workflow%3ABuild)
+[![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/48252)
 
 > 🚀 Help me to become a full-time open-source developer by [sponsoring me on GitHub](https://github.com/sponsors/messense)
 
