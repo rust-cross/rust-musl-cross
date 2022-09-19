@@ -53,7 +53,26 @@ jobs:
                 let outputArchMatrix = []
                 let outputTargetMatrix = []
 
-                const borsArgs = commitMessage.replace(/(Try|Merge) #[0-9]+:/i, '').trim()
+                let borsArgs
+                if (commitMessage.startsWith('Try #')) {
+                  borsArgs = commitMessage.replace(/Try #[0-9]+:/i, '').trim()
+                } else {
+                  // Merge example commit message:
+                  // Merge #64
+                  //
+                  // 64: Refine bors command r=messense a=messense
+                  //
+                  // amd64 --target aarch64
+                  //
+                  // Co-authored-by: messense <messense@icloud.com>
+                  //
+                  borsArgs = commitMessage
+                    .split('\n')
+                    .slice(4)
+                    .filter(item => item.trim().length > 0 && !item.trim().startsWith('Co-authored-by:'))
+                    .join('\n')
+                    .trim()
+                }
                 const targetIndex = borsArgs.indexOf('--target')
                 let dockerArch = []
                 let targets = []
