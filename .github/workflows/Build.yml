@@ -234,7 +234,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Test Docker cargo build
-        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') }}
+        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') }}
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
