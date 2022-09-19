@@ -62,14 +62,13 @@ jobs:
                   //
                   // 64: Refine bors command r=messense a=messense
                   //
-                  // amd64 --target aarch64
+                  // bors: amd64 --target aarch64
                   //
                   // Co-authored-by: messense <messense@icloud.com>
                   //
                   borsArgs = commitMessage
                     .split('\n')
-                    .slice(4)
-                    .filter(item => item.trim().length > 0 && !item.trim().startsWith('Co-authored-by:'))
+                    .filter(item => item.trim().startsWith('bors:'))
                     .join('\n')
                     .trim()
                 }
