@@ -1,0 +1,37 @@
+From 88526c161aa3d0f0489639ee0c21c1c086ed13ea Mon Sep 17 00:00:00 2001
+From: Aleksei Nikiforov <aleksei.nikiforov@linux.ibm.com>
+Date: Thu, 28 Apr 2022 16:48:55 +0200
+Subject: [PATCH 1/2] When linking statically on musl-based system, also link
+ libc when gcc_eh is used instead of libunwind.
+
+Otherwise following errors are possible:
+
+$ rustc -C target-feature=+crt-static hello_world.rs
+error: linking with `cc` failed: exit status: 1
+  |
+  = note: "cc" "hello_world.hello_world.85b1eb1f-cgu.0.rcgu.o" "hello_world.hello_world.85b1eb1f-cgu.1.rcgu.o" "hello_world.hello_world.85b1eb1f-cgu.2.rcgu.o" "hello_world.hello_world.85b1eb1f-cgu.3.rcgu.o" "hello_world.hello_world.85b1eb1f-cgu.4.rcgu.o" "hello_world.hello_world.85b1eb1f-cgu.5.rcgu.o" "hello_world.hello_world.85b1eb1f-cgu.6.rcgu.o" "hello_world.hello_world.85b1eb1f-cgu.7.rcgu.o" "hello_world.p360wm7isvrz3vl.rcgu.o" "-Wl,--as-needed" "-L" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib" "-Wl,--start-group" "-Wl,-Bstatic" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libstd-290453869c457fa2.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libpanic_unwind-cbf6379a7da8bab0.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libminiz_oxide-a92dd9c70c39c672.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libadler-d4dbc2eb60b8d045.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libobject-e23cb707e37f1c09.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libmemchr-70d429b287cab148.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libaddr2line-ad67e2e2488bac33.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libgimli-af4695e3f837f020.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/librustc_demangle-af414388b3a5e049.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libstd_detect-0cbfc57a1d48d386.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libhashbrown-542ee322b311bdfb.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/librustc_std_workspace_alloc-f412568a9ae32e92.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libunwind-624d853e4eabb73e.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libcfg_if-3afcf6ee80435613.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/liblibc-db67086a5554dc7a.rlib" "-lc" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/liballoc-55707620a5208b22.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/librustc_std_workspace_core-dbebf5ac373a4d82.rlib" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libcore-8f983ad6f90a3ca2.rlib" "-Wl,--end-group" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib/libcompiler_builtins-8976cae3a94d0248.rlib" "-Wl,-Bdynamic" "-lssp_nonshared" "-lgcc_eh" "-Wl,--eh-frame-hdr" "-Wl,-znoexecstack" "-L" "/usr/lib/rustlib/s390x-alpine-linux-musl/lib" "-o" "hello_world" "-Wl,--gc-sections" "-static-pie" "-Wl,-zrelro,-znow" "-nodefaultlibs"
+  = note: /usr/lib/gcc/s390x-alpine-linux-musl/11.2.1/../../../../s390x-alpine-linux-musl/bin/ld: /usr/lib/gcc/s390x-alpine-linux-musl/11.2.1/libgcc_eh.a(unwind-dw2.o): in function `__gthread_once':
+          /home/buildozer/aports/main/gcc/src/build/s390x-alpine-linux-musl/libgcc/./gthr-default.h:700: undefined reference to `pthread_once'
+          collect2: error: ld returned 1 exit status
+
+  = help: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified
+  = note: use the `-l` flag to specify native libraries to link
+  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#cargorustc-link-libkindname)
+
+error: aborting due to previous error
+---
+
+--- a/library/unwind/src/lib.rs
++++ b/library/unwind/src/lib.rs
+@@ -51,7 +51,10 @@
+         #[link(name = "unwind", cfg(not(target_feature = "crt-static")))]
+         extern "C" {}
+     } else {
+-        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
++        // on musl gcc_eh needs pthread_once from libc
++        #[link(name = "gcc_eh", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
++        #[link(name = "c", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
++        extern "C" {}
+         #[link(name = "gcc_s", cfg(not(target_feature = "crt-static")))]
+         extern "C" {}
+     }

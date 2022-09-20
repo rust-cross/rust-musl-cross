@@ -183,10 +183,10 @@ jobs:
           TARGET: powerpc64le-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: nightly
-        # - IMAGE_TAG: s390x-musl
-        #   TARGET: s390x-unknown-linux-musl
-        #   RUST_MUSL_MAKE_CONFIG: config.mak
-        #   TOOLCHAIN: nightly
+        - IMAGE_TAG: s390x-musl
+          TARGET: s390x-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: nightly
         - IMAGE_TAG: x86_64-musl
           TARGET: x86_64-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
@@ -234,12 +234,14 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Test Docker cargo build
-        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') }}
+        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') }}
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
             ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
       - name: Build and push multiarch image
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           set -e
 
@@ -248,49 +250,70 @@ jobs:
           chmod +x manifest-tool
 
           echo "image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
-          manifests:
-            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+          manifests:" > ghcr-manifest.yaml
+
+          if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 > /dev/null; then
+            echo "  - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
               platform:
                 architecture: amd64
-                os: linux
-            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+                os: linux" >> ghcr-manifest.yaml
+          fi
+
+          if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 > /dev/null; then
+            echo "  - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
               platform:
                 architecture: arm64
-                os: linux
-            - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
+                os: linux" >> ghcr-manifest.yaml
+          fi
+
+          if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 > /dev/null; then
+            echo "  - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
               platform:
                 architecture: arm/v7
-                os: linux
-          " > ghcr-manifest.yaml
-          ./manifest-tool push from-spec ghcr-manifest.yaml || exit 0
+                os: linux" >> ghcr-manifest.yaml
+          fi
+
+          cat ghcr-manifest.yaml
+          ./manifest-tool push from-spec ghcr-manifest.yaml
       - name: Sync images to Docker Hub
         if: ${{ github.repository_owner == 'messense' }}
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           set -e
           sudo apt-get update
           sudo apt-get -y install skopeo
           skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
           skopeo login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
-          skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
-          skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-          skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
-
+          
           echo "image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
-          manifests:
-            - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+          manifests:" > dockerhub-manifest.yaml
+
+          if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 > /dev/null; then
+            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+            echo "  - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
               platform:
                 architecture: amd64
-                os: linux
-            - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+                os: linux" >> dockerhub-manifest.yaml
+          fi
+
+          if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 > /dev/null; then
+            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+            echo "  - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
               platform:
                 architecture: arm64
-                os: linux
-            - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
+                os: linux" >> dockerhub-manifest.yaml
+          fi
+
+          if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 > /dev/null; then
+            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
+            echo "  - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
               platform:
                 architecture: arm/v7
-                os: linux
-          " > dockerhub-manifest.yaml
+                os: linux" >> dockerhub-manifest.yaml
+          fi
 
+          cat dockerhub-manifest.yaml
           ./manifest-tool push from-spec dockerhub-manifest.yaml
 
   conclusion:
