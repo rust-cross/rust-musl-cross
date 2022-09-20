@@ -44,7 +44,7 @@ DL_CMD = curl -C - -L -o
 
 # Recommended options for smaller build for deploying binaries:
 
-COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"
+COMMON_CONFIG += CFLAGS="-g0 -Os -Wno-format-diag -Wno-format-security" CXXFLAGS="-g0 -Os -Wno-format-diag -Wno-format-security" LDFLAGS="-s"
 
 # Recommended options for faster/simpler build:
 
