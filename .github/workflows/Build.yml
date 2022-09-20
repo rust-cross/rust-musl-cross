@@ -28,6 +28,7 @@ jobs:
       arch: ${{ steps.generate-matrix.outputs.arch }}
       target: ${{ steps.generate-matrix.outputs.target }}
       run-build: ${{ steps.generate-matrix.outputs.run-build }}
+      fail-fast: ${{ steps.generate-matrix.outputs.fail-fast }}
     steps:
       - uses: actions/setup-node@v2
         with:
@@ -107,6 +108,20 @@ jobs:
                 core.setOutput('target', JSON.stringify(targetMatrix))
                 core.setOutput('run-build', 'false')
               }
+
+              const matches = commitMessage.match(/(Try|Merge) #([0-9]+):/)
+              if (matches) {
+                const prNumber = matches[2]
+                const { data: { labels: labels } } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                })
+                const labelNames = labels.map(label => label.name)
+                if (labelNames.includes('CI-no-fail-fast')) {
+                  core.setOutput('fail-fast', 'false')
+                }
+              }
             } else {
               core.setOutput('arch', JSON.stringify(archMatrix))
               core.setOutput('target', JSON.stringify(targetMatrix))
@@ -116,7 +131,8 @@ jobs:
         run: |
           echo '${{ toJson(steps.generate-matrix.outputs.arch) }}'
           echo '${{ toJson(steps.generate-matrix.outputs.target) }}'
-          echo Run build: ${{ steps.generate-matrix.outputs.run-build || 'true' }}
+          echo run build: ${{ steps.generate-matrix.outputs.run-build || 'true' }}
+          echo fail fast: ${{ steps.generate-matrix.outputs.fail-fast || 'true' }}
     env:
       COMMIT_MESSAGE: >
         ${{
@@ -198,6 +214,7 @@ jobs:
     if: ${{ needs.setup.outputs.run-build != 'false' }}
     needs: setup
     strategy:
+      fail-fast: ${{ needs.setup.outputs.fail-fast != 'false' }}
       matrix:
         os: ${{ fromJson(needs.setup.outputs.arch) }}
         env: ${{ fromJson(needs.setup.outputs.target) }}
