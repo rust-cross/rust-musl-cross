@@ -16,11 +16,11 @@ then
   cd custom-std
   cp /tmp/Xargo.toml .
   rustc -Z unstable-options --print target-spec-json --target "$TARGET" | tee "$TARGET.json"
-  RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L/usr/local/musl/lib/gcc/$TARGET/9.2.0/" xargo build --target "$TARGET"
+  RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L/usr/local/musl/lib/gcc/$TARGET/11.2.0/" xargo build --target "$TARGET"
   cp -r "/root/.xargo/lib/rustlib/$TARGET" "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/"
   mkdir "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained"
   cp /usr/local/musl/"$TARGET"/lib/*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
-  cp /usr/local/musl/lib/gcc/"$TARGET"/9.2.0/c*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
+  cp /usr/local/musl/lib/gcc/"$TARGET"/11.2.0/c*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
   cd ..
   rm -rf /root/.xargo /root/.cargo/registry /root/.cargo/git custom-std
 
