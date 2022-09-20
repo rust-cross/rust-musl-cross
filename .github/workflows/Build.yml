@@ -287,7 +287,8 @@ jobs:
           if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 > /dev/null; then
             echo "  - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
               platform:
-                architecture: arm/v7
+                architecture: arm
+                variant: v7
                 os: linux" >> ghcr-manifest.yaml
           fi
 
@@ -327,7 +328,8 @@ jobs:
             skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
             echo "  - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
               platform:
-                architecture: arm/v7
+                architecture: arm
+                variant: v7
                 os: linux" >> dockerhub-manifest.yaml
           fi
 
