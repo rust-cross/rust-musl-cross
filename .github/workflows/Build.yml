@@ -153,47 +153,47 @@ jobs:
           TOOLCHAIN: stable
         - IMAGE_TAG: arm-musleabi
           TARGET: arm-unknown-linux-musleabi
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: arm-musleabihf
           TARGET: arm-unknown-linux-musleabihf
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: armv5te-musleabi
           TARGET: armv5te-unknown-linux-musleabi
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: armv7-musleabi
           TARGET: armv7-unknown-linux-musleabi
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: armv7-musleabihf
           TARGET: armv7-unknown-linux-musleabihf
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: i586-musl
           TARGET: i586-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: i686-musl
           TARGET: i686-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mips-musl
           TARGET: mips-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mips64-muslabi64
           TARGET: mips64-unknown-linux-muslabi64
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mips64el-muslabi64
           TARGET: mips64el-unknown-linux-muslabi64
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mipsel-musl
           TARGET: mipsel-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: powerpc64le-musl
           TARGET: powerpc64le-unknown-linux-musl
