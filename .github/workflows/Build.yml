@@ -249,8 +249,8 @@ jobs:
           no-cache: ${{ github.event.inputs.no_cache == 'yes' }}
           context: .
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }},mode=max
       - name: Test Docker cargo build
         if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') }}
         run: |
