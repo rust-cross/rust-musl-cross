@@ -16,7 +16,10 @@ OUTPUT = /usr/local/musl
 # headers, which are not needed unless compiling programs that use them.
 
 # BINUTILS_VER =
-# GCC_VER =
+
+# undefined reference to `getauxval' on GCC 11.2.0
+# https://github.com/messense/rust-musl-cross/pull/67#issuecomment-1251905512
+GCC_VER = 9.2.0
 
 # https://github.com/rust-embedded/cross/issues/478
 # https://github.com/rust-lang/libc/issues/1848
@@ -44,7 +47,7 @@ DL_CMD = curl -C - -L -o
 
 # Recommended options for smaller build for deploying binaries:
 
-COMMON_CONFIG += CFLAGS="-g0 -Os" CXXFLAGS="-g0 -Os" LDFLAGS="-s"
+COMMON_CONFIG += CFLAGS="-g0 -Os -w" CXXFLAGS="-g0 -Os -w" LDFLAGS="-s"
 
 # Recommended options for faster/simpler build:
 

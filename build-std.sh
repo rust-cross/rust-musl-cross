@@ -2,6 +2,9 @@
 set -e
 if [[ "$TARGET" = "powerpc64le-unknown-linux-musl" || "$TARGET" = "s390x-unknown-linux-musl" ]]
 then
+  export CARGO_NET_GIT_FETCH_WITH_CLI=true
+  export CARGO_UNSTABLE_SPARSE_REGISTRY=true
+
   HOST=$(rustc -Vv | grep 'host:' | awk '{print $2}')
   # patch unwind for s390x
   if [[ "$TARGET" = "s390x-unknown-linux-musl" ]]
@@ -16,11 +19,11 @@ then
   cd custom-std
   cp /tmp/Xargo.toml .
   rustc -Z unstable-options --print target-spec-json --target "$TARGET" | tee "$TARGET.json"
-  RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L/usr/local/musl/lib/gcc/$TARGET/9.2.0/" xargo build --target "$TARGET"
+  RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L/usr/local/musl/lib/gcc/$TARGET/11.2.0/" xargo build --target "$TARGET"
   cp -r "/root/.xargo/lib/rustlib/$TARGET" "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/"
   mkdir "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained"
   cp /usr/local/musl/"$TARGET"/lib/*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
-  cp /usr/local/musl/lib/gcc/"$TARGET"/9.2.0/c*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
+  cp /usr/local/musl/lib/gcc/"$TARGET"/11.2.0/c*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
   cd ..
   rm -rf /root/.xargo /root/.cargo/registry /root/.cargo/git custom-std
 

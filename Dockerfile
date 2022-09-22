@@ -36,14 +36,11 @@ RUN update-ca-certificates
 
 ARG TARGET=x86_64-unknown-linux-musl
 ENV RUST_MUSL_CROSS_TARGET=$TARGET
-ARG RUST_MUSL_MAKE_VER=0.9.9
 ARG RUST_MUSL_MAKE_CONFIG=config.mak
 
 COPY $RUST_MUSL_MAKE_CONFIG /tmp/config.mak
-RUN cd /tmp && curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/musl-cross-make/archive/v$RUST_MUSL_MAKE_VER.zip && \
-    unzip -q musl-cross-make.zip && \
-    rm musl-cross-make.zip && \
-    mv musl-cross-make-$RUST_MUSL_MAKE_VER musl-cross-make && \
+RUN cd /tmp && \
+    git clone --depth 1 https://github.com/richfelker/musl-cross-make.git && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
     export TARGET=$TARGET && \

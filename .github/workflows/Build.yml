@@ -28,6 +28,7 @@ jobs:
       arch: ${{ steps.generate-matrix.outputs.arch }}
       target: ${{ steps.generate-matrix.outputs.target }}
       run-build: ${{ steps.generate-matrix.outputs.run-build }}
+      fail-fast: ${{ steps.generate-matrix.outputs.fail-fast }}
     steps:
       - uses: actions/setup-node@v2
         with:
@@ -107,6 +108,20 @@ jobs:
                 core.setOutput('target', JSON.stringify(targetMatrix))
                 core.setOutput('run-build', 'false')
               }
+
+              const matches = commitMessage.match(/(Try|Merge) #([0-9]+):/)
+              if (matches) {
+                const prNumber = matches[2]
+                const { data: { labels: labels } } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                })
+                const labelNames = labels.map(label => label.name)
+                if (labelNames.includes('CI-no-fail-fast')) {
+                  core.setOutput('fail-fast', 'false')
+                }
+              }
             } else {
               core.setOutput('arch', JSON.stringify(archMatrix))
               core.setOutput('target', JSON.stringify(targetMatrix))
@@ -116,7 +131,8 @@ jobs:
         run: |
           echo '${{ toJson(steps.generate-matrix.outputs.arch) }}'
           echo '${{ toJson(steps.generate-matrix.outputs.target) }}'
-          echo Run build: ${{ steps.generate-matrix.outputs.run-build || 'true' }}
+          echo run build: ${{ steps.generate-matrix.outputs.run-build || 'true' }}
+          echo fail fast: ${{ steps.generate-matrix.outputs.fail-fast || 'true' }}
     env:
       COMMIT_MESSAGE: >
         ${{
@@ -133,51 +149,51 @@ jobs:
       TARGET_MATRIX: |
         - IMAGE_TAG: aarch64-musl
           TARGET: aarch64-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak
+          RUST_MUSL_MAKE_CONFIG: config.mak.aarch64
           TOOLCHAIN: stable
         - IMAGE_TAG: arm-musleabi
           TARGET: arm-unknown-linux-musleabi
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: arm-musleabihf
           TARGET: arm-unknown-linux-musleabihf
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: armv5te-musleabi
           TARGET: armv5te-unknown-linux-musleabi
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: armv7-musleabi
           TARGET: armv7-unknown-linux-musleabi
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: armv7-musleabihf
           TARGET: armv7-unknown-linux-musleabihf
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: i586-musl
           TARGET: i586-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: i686-musl
           TARGET: i686-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mips-musl
           TARGET: mips-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mips64-muslabi64
           TARGET: mips64-unknown-linux-muslabi64
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mips64el-muslabi64
           TARGET: mips64el-unknown-linux-muslabi64
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mipsel-musl
           TARGET: mipsel-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.32
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: powerpc64le-musl
           TARGET: powerpc64le-unknown-linux-musl
@@ -198,6 +214,7 @@ jobs:
     if: ${{ needs.setup.outputs.run-build != 'false' }}
     needs: setup
     strategy:
+      fail-fast: ${{ needs.setup.outputs.fail-fast != 'false' }}
       matrix:
         os: ${{ fromJson(needs.setup.outputs.arch) }}
         env: ${{ fromJson(needs.setup.outputs.target) }}
@@ -210,7 +227,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
       - name: Login to DockerHub
         if: ${{ github.repository_owner == 'messense' }}
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
@@ -230,9 +247,10 @@ jobs:
             TOOLCHAIN=${{ github.event.inputs.toolchain || matrix.env.TOOLCHAIN }}
           tags: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           no-cache: ${{ github.event.inputs.no_cache == 'yes' }}
+          context: .
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }},mode=max
       - name: Test Docker cargo build
         if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') }}
         run: |
@@ -269,7 +287,8 @@ jobs:
           if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 > /dev/null; then
             echo "  - image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
               platform:
-                architecture: arm/v7
+                architecture: arm
+                variant: v7
                 os: linux" >> ghcr-manifest.yaml
           fi
 
@@ -309,7 +328,8 @@ jobs:
             skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
             echo "  - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
               platform:
-                architecture: arm/v7
+                architecture: arm
+                variant: v7
                 os: linux" >> dockerhub-manifest.yaml
           fi
 
