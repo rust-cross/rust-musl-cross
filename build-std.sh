@@ -2,6 +2,8 @@
 set -e
 if [[ "$TARGET" = "powerpc64le-unknown-linux-musl" || "$TARGET" = "s390x-unknown-linux-musl" ]]
 then
+  export CARGO_NET_GIT_FETCH_WITH_CLI=true
+
   HOST=$(rustc -Vv | grep 'host:' | awk '{print $2}')
   # patch unwind for s390x
   if [[ "$TARGET" = "s390x-unknown-linux-musl" ]]
