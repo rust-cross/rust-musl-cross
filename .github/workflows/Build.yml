@@ -15,6 +15,10 @@ on:
         description: Rust toolchain to install
         default: 'stable'
         required: false
+      arch:
+        description: Architectures to build for
+        default: ''
+        required: false
   schedule:
     - cron: '0 0 1 */2 *'
 
@@ -44,9 +48,21 @@ jobs:
             const archMatrix = yaml.load(process.env.ARCH_MATRIX)
             const targetMatrix = yaml.load(process.env.TARGET_MATRIX)
 
-            if (context.eventName == 'schedule' || context.eventName == 'workflow_dispatch') {
-              // Always run on schedule or workflow_dispatch
+            if (context.eventName == 'schedule') {
+              // Always run on schedule
               core.setOutput('arch', JSON.stringify(archMatrix))
+              core.setOutput('target', JSON.stringify(targetMatrix))
+            } else if (context.eventName == 'workflow_dispatch') {
+              let outputArchMatrix = []
+              const dockerArch = context.payload.inputs.arch.split(',')
+              if (dockerArch.length > 0) {
+                for (const arch of dockerArch) {
+                  outputArchMatrix.push(...archMatrix.filter(item => item.arch == arch))
+                }
+              } else {
+                outputArchMatrix = archMatrix
+              }
+              core.setOutput('arch', JSON.stringify(outputArchMatrix))
               core.setOutput('target', JSON.stringify(targetMatrix))
             } else if (context.eventName == 'push') {
               const commitMessage = process.env.COMMIT_MESSAGE.trim()
