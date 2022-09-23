@@ -54,7 +54,8 @@ jobs:
               core.setOutput('target', JSON.stringify(targetMatrix))
             } else if (context.eventName == 'workflow_dispatch') {
               let outputArchMatrix = []
-              const dockerArch = context.payload.inputs.arch.split(',')
+              let outputTargetMatrix = []
+              const dockerArch = context.payload.workflow_dispatch.inputs.arch.split(',')
               if (dockerArch.length > 0) {
                 for (const arch of dockerArch) {
                   outputArchMatrix.push(...archMatrix.filter(item => item.arch == arch))
@@ -62,8 +63,17 @@ jobs:
               } else {
                 outputArchMatrix = archMatrix
               }
+
+              const toolchain = context.payload.workflow_dispatch.inputs.toolchain
+              for (const target of targetMatrix) {
+                if (target.TOOLCHAIN == 'nightly' && toolchain != 'nightly') {
+                  outputArchMatrix.push(target)
+                } else {
+                  outputTargetMatrix.push({...target, TOOLCHAIN: toolchain})
+                }
+              }
               core.setOutput('arch', JSON.stringify(outputArchMatrix))
-              core.setOutput('target', JSON.stringify(targetMatrix))
+              core.setOutput('target', JSON.stringify(outputArchMatrix))
             } else if (context.eventName == 'push') {
               const commitMessage = process.env.COMMIT_MESSAGE.trim()
               if (commitMessage.length > 0) {
@@ -260,7 +270,7 @@ jobs:
           build-args: |
             TARGET=${{ matrix.env.TARGET }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
-            TOOLCHAIN=${{ github.event.inputs.toolchain || matrix.env.TOOLCHAIN }}
+            TOOLCHAIN=${{ matrix.env.TOOLCHAIN }}
           tags: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           no-cache: ${{ github.event.inputs.no_cache == 'yes' }}
           context: .
