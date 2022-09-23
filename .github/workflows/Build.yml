@@ -74,6 +74,7 @@ jobs:
               }
               core.setOutput('arch', JSON.stringify(outputArchMatrix))
               core.setOutput('target', JSON.stringify(outputTargetMatrix))
+              core.setOutput('fail-fast', 'false')
             } else if (context.eventName == 'push') {
               const commitMessage = process.env.COMMIT_MESSAGE.trim()
               if (commitMessage.length > 0) {
