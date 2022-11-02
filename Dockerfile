@@ -77,8 +77,8 @@ RUN export CC=$TARGET_CC && \
     export AR=$TARGET_AR && \
     export RANLIB=$TARGET_RANLIB && \
     echo "Building zlib" && \
-    VERS=1.2.12 && \
-    CHECKSUM=91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9 && \
+    VERS=1.2.13 && \
+    CHECKSUM=b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30 && \
     cd /home/rust/libs && \
     curl -sqLO https://zlib.net/zlib-$VERS.tar.gz && \
     echo "$CHECKSUM zlib-$VERS.tar.gz" > checksums.txt && \
