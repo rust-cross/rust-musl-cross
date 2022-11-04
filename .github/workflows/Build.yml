@@ -34,7 +34,7 @@ jobs:
       run-build: ${{ steps.generate-matrix.outputs.run-build }}
       fail-fast: ${{ steps.generate-matrix.outputs.fail-fast }}
     steps:
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 16
       - run: npm install js-yaml
@@ -247,7 +247,7 @@ jobs:
         env: ${{ fromJson(needs.setup.outputs.target) }}
     env: ${{ matrix.env }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup QEMU
         uses: dbhi/qus/action@main
       - name: Setup Docker Buildx
@@ -265,7 +265,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: docker build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           platforms: linux/${{ matrix.os.docker_arch || matrix.os.arch }}
           build-args: |
