@@ -331,16 +331,12 @@ jobs:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           set -e
-          sudo apt-get update
-          sudo apt-get -y install skopeo
-          skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
-          skopeo login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
           
           echo "image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG
           manifests:" > dockerhub-manifest.yaml
 
           if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 > /dev/null; then
-            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-amd64
+            docker run --rm quay.io/skopeo/stable:latest copy --src-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }} --dest-creds ${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }} --retry-times 3 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-amd64
             echo "  - image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-amd64
               platform:
                 architecture: amd64
@@ -348,7 +344,7 @@ jobs:
           fi
 
           if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 > /dev/null; then
-            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-arm64
+            docker run --rm quay.io/skopeo/stable:latest copy --src-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }} --dest-creds ${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }} --retry-times 3 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-arm64
             echo "  - image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-arm64
               platform:
                 architecture: arm64
@@ -356,7 +352,7 @@ jobs:
           fi
 
           if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 > /dev/null; then
-            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-armv7
+            docker run --rm quay.io/skopeo/stable:latest copy --src-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }} --dest-creds ${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }} --retry-times 3 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-armv7
             echo "  - image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-armv7
               platform:
                 architecture: arm
