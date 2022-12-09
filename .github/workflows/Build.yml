@@ -105,10 +105,10 @@ jobs:
                 let targets = []
 
                 if (targetIndex === -1) {
-                  dockerArch = borsArgs.trim().split(' ')
+                  dockerArch = borsArgs.trim().split(' ').filter(x => x.length > 0)
                   targets = []
                 } else {
-                  dockerArch = borsArgs.substring(0, targetIndex).trim().split(' ')
+                  dockerArch = borsArgs.substring(0, targetIndex).trim().split(' ').filter(x => x.length > 0)
                   targets = borsArgs.substring(targetIndex + '--target'.length).trim().split(' ')
                 }
                 if (dockerArch.length === 0) {
@@ -170,8 +170,11 @@ jobs:
           }}
       ARCH_MATRIX: |
         - arch: amd64
+          runner: [ubuntu-latest]
         - arch: arm64
+          runner: [self-hosted, ARM64]
         - arch: armv7
+          runner: [ubuntu-latest]
           docker_arch: arm/v7
       TARGET_MATRIX: |
         - IMAGE_TAG: aarch64-musl
@@ -237,7 +240,7 @@ jobs:
 
   build:
     name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os.runner }}
     if: ${{ needs.setup.outputs.run-build != 'false' }}
     needs: setup
     strategy:
@@ -250,10 +253,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup QEMU
         uses: dbhi/qus/action@main
+        if: ${{ contains(matrix.os.runner, 'ubuntu-latest') }}
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to DockerHub
-        if: ${{ github.repository_owner == 'messense' }}
+        if: ${{ github.repository_owner == 'rust-cross' }}
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -322,38 +326,34 @@ jobs:
           cat ghcr-manifest.yaml
           ./manifest-tool push from-spec ghcr-manifest.yaml
       - name: Sync images to Docker Hub
-        if: ${{ github.repository_owner == 'messense' }}
+        if: ${{ github.repository_owner == 'rust-cross' }}
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           set -e
-          sudo apt-get update
-          sudo apt-get -y install skopeo
-          skopeo login -u ${{ github.repository_owner }} -p ${{ secrets.GITHUB_TOKEN }} ghcr.io
-          skopeo login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }} docker.io
           
-          echo "image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG
+          echo "image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG
           manifests:" > dockerhub-manifest.yaml
 
           if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 > /dev/null; then
-            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
-            echo "  - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64
+            docker run --rm quay.io/skopeo/stable:latest copy --src-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }} --dest-creds ${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }} --retry-times 3 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-amd64 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-amd64
+            echo "  - image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-amd64
               platform:
                 architecture: amd64
                 os: linux" >> dockerhub-manifest.yaml
           fi
 
           if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 > /dev/null; then
-            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
-            echo "  - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64
+            docker run --rm quay.io/skopeo/stable:latest copy --src-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }} --dest-creds ${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }} --retry-times 3 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-arm64 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-arm64
+            echo "  - image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-arm64
               platform:
                 architecture: arm64
                 os: linux" >> dockerhub-manifest.yaml
           fi
 
           if docker manifest inspect ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 > /dev/null; then
-            skopeo copy docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
-            echo "  - image: ${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7
+            docker run --rm quay.io/skopeo/stable:latest copy --src-creds ${{ github.repository_owner }}:${{ secrets.GITHUB_TOKEN }} --dest-creds ${{ secrets.DOCKER_USERNAME }}:${{ secrets.DOCKER_PASSWORD }} --retry-times 3 docker://ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-armv7 docker://${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-armv7
+            echo "  - image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG-armv7
               platform:
                 architecture: arm
                 variant: v7
