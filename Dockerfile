@@ -44,8 +44,9 @@ RUN cd /tmp && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
     export TARGET=$TARGET && \
-    make -j$(nproc) > /tmp/musl-cross-make.log && \
-    make install >> /tmp/musl-cross-make.log && \
+    if [ `dpkg --print-architecture` = 'armhf' ] && [ `uname -m` = 'aarch64' ]; then SETARCH=linux32; else SETARCH= ; fi && \
+    $SETARCH make -j$(nproc) > /tmp/musl-cross-make.log && \
+    $SETARCH make install >> /tmp/musl-cross-make.log && \
     ln -s /usr/local/musl/bin/$TARGET-strip /usr/local/musl/bin/musl-strip && \
     cd /tmp && \
     rm -rf /tmp/musl-cross-make /tmp/musl-cross-make.log
@@ -99,11 +100,13 @@ ARG TOOLCHAIN=stable
 #
 # Remove docs and more stuff not needed in this images to make them smaller
 RUN chmod 755 /root/ && \
+    if [ `dpkg --print-architecture` = 'armhf' ]; then GNU_TARGET="armv7-unknown-linux-gnueabihf"; else GNU_TARGET=`uname -m`-unknown-linux-gnu; fi && \
+    export RUSTUP_USE_CURL=1 && \
     curl https://sh.rustup.rs -sqSf | \
-    sh -s -- -y --profile minimal --default-toolchain $TOOLCHAIN && \
+    sh -s -- -y --profile minimal --default-toolchain $TOOLCHAIN --default-host $GNU_TARGET && \
     rustup target add $TARGET || rustup component add --toolchain $TOOLCHAIN rust-src && \
     rustup component add --toolchain $TOOLCHAIN rustfmt clippy && \
-    rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$(uname -m)-unknown-linux-gnu/share/
+    rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$GNU_TARGET/share/
 
 RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 

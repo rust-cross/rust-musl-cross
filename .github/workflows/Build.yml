@@ -174,7 +174,7 @@ jobs:
         - arch: arm64
           runner: [self-hosted, ARM64]
         - arch: armv7
-          runner: [ubuntu-latest]
+          runner: [self-hosted, ARM64]
           docker_arch: arm/v7
       TARGET_MATRIX: |
         - IMAGE_TAG: aarch64-musl
