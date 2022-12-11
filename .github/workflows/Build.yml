@@ -325,6 +325,10 @@ jobs:
 
           cat ghcr-manifest.yaml
           ./manifest-tool push from-spec ghcr-manifest.yaml
+
+          echo "image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$TARGET" > ghcr-manifest-target.yaml
+          sed -n '1d;p' ghcr-manifest.yaml >> ghcr-manifest-target.yaml
+          ./manifest-tool push from-spec ghcr-manifest-target.yaml
       - name: Sync images to Docker Hub
         if: ${{ github.repository_owner == 'rust-cross' }}
         env:

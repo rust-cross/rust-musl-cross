@@ -39,10 +39,19 @@ ENV RUST_MUSL_CROSS_TARGET=$TARGET
 ARG RUST_MUSL_MAKE_CONFIG=config.mak
 
 COPY $RUST_MUSL_MAKE_CONFIG /tmp/config.mak
+# Fix the cfi detection script in musl's configure so cfi is generated
+# when debug info is asked for. This patch is derived from
+# https://git.musl-libc.org/cgit/musl/commit/?id=c4d4028dde90562f631edf559fbc42d8ec1b29de.
+# When we upgrade to a version that includes this commit, we can remove the patch.
+COPY musl-patch-configure.diff /tmp/musl-patch-configure.diff
+
 RUN cd /tmp && \
     git clone --depth 1 https://github.com/richfelker/musl-cross-make.git && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
+    mkdir patches/musl-1.1.24 && \
+    cp /tmp/musl-patch-configure.diff patches/musl-1.1.24/0001-fix-cfi-detection.diff && \
+    export CFLAGS="-fPIC -g1 $CFLAGS" && \
     export TARGET=$TARGET && \
     if [ `dpkg --print-architecture` = 'armhf' ] && [ `uname -m` = 'aarch64' ]; then SETARCH=linux32; else SETARCH= ; fi && \
     $SETARCH make -j$(nproc) > /tmp/musl-cross-make.log && \
