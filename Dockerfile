@@ -51,6 +51,7 @@ RUN cd /tmp && \
     cd /tmp/musl-cross-make && \
     mkdir patches/musl-1.1.24 && \
     cp /tmp/musl-patch-configure.diff patches/musl-1.1.24/0001-fix-cfi-detection.diff && \
+    export CFLAGS="-fPIC -g1 $CFLAGS" && \
     export TARGET=$TARGET && \
     if [ `dpkg --print-architecture` = 'armhf' ] && [ `uname -m` = 'aarch64' ]; then SETARCH=linux32; else SETARCH= ; fi && \
     $SETARCH make -j$(nproc) > /tmp/musl-cross-make.log && \
