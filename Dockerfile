@@ -26,7 +26,6 @@ RUN apt-get update && \
         bison \
         llvm-dev \
         libclang-dev \
-        gcc-multilib \
         clang \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
