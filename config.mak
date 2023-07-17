@@ -18,10 +18,7 @@ OUTPUT = /usr/local/musl
 # BINUTILS_VER =
 GCC_VER = 11.2.0
 
-# https://github.com/rust-embedded/cross/issues/478
-# https://github.com/rust-lang/libc/issues/1848
-
-MUSL_VER = 1.1.24
+MUSL_VER = 1.2.3
 
 # GMP_VER =
 # MPC_VER =
