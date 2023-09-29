@@ -90,7 +90,7 @@ RUN export CC=$TARGET_CC && \
     VERS=1.2.13 && \
     CHECKSUM=b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30 && \
     cd /home/rust/libs && \
-    curl -sqLO https://zlib.net/zlib-$VERS.tar.gz && \
+    curl -sqLO https://zlib.net/fossils/zlib-$VERS.tar.gz && \
     echo "$CHECKSUM zlib-$VERS.tar.gz" > checksums.txt && \
     sha256sum -c checksums.txt && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
