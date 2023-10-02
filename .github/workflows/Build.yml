@@ -234,7 +234,7 @@ jobs:
         env: ${{ fromJson(needs.setup.outputs.target) }}
     env: ${{ matrix.env }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup QEMU
         uses: dbhi/qus/action@main
         if: ${{ contains(matrix.os.runner, 'ubuntu-latest') }}
