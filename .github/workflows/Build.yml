@@ -5,6 +5,7 @@ on:
       - staging
       # for bors try
       - trying
+      - reenable-mipsel
   workflow_dispatch:
     inputs:
       no_cache:
