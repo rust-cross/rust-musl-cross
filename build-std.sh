@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-if [[ "$TARGET" = "powerpc64le-unknown-linux-musl" || "$TARGET" = "s390x-unknown-linux-musl" ]]
+if [[ "$TARGET" = powerpc64* || "$TARGET" = "s390x-unknown-linux-musl" ]]
 then
   export CARGO_NET_GIT_FETCH_WITH_CLI=true
   export CARGO_UNSTABLE_SPARSE_REGISTRY=true
@@ -28,7 +28,7 @@ then
   rm -rf /root/.xargo /root/.cargo/registry /root/.cargo/git custom-std
 
   # compile libunwind
-  if [[ "$TARGET" = "powerpc64le-unknown-linux-musl" ]]
+  if [[ "$TARGET" = powerpc64* ]]
   then
     cargo run --manifest-path /tmp/compile-libunwind/Cargo.toml -- --target "$TARGET" "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/src/rust/src/llvm-project/libunwind" out
     cp out/libunwind*.a "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/"
