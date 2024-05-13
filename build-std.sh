@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-if [[ "$TARGET" = "powerpc64le-unknown-linux-musl" || "$TARGET" = "s390x-unknown-linux-musl" ]]
+if [[ "$TOOLCHAIN" = "nightly" ]]
 then
   export CARGO_NET_GIT_FETCH_WITH_CLI=true
   export CARGO_UNSTABLE_SPARSE_REGISTRY=true
