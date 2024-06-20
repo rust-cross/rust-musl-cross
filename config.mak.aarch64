@@ -19,7 +19,7 @@ OUTPUT = /usr/local/musl
 
 # undefined reference to `getauxval' on GCC 11.2.0
 # https://github.com/messense/rust-musl-cross/pull/67#issuecomment-1251905512
-GCC_VER = 9.2.0
+GCC_VER = 9.4.0
 
 MUSL_VER = 1.2.3
 
