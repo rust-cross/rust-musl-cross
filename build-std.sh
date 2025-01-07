@@ -14,7 +14,7 @@ then
 	cd -
   fi
 
-  cargo install xargo
+  cargo install xargo --git https://github.com/AverseABFun/xargo.git
   cargo new --lib custom-std
   cd custom-std
   cp /tmp/Xargo.toml .
