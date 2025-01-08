@@ -27,11 +27,4 @@ then
   cd ..
   rm -rf /root/.xargo /root/.cargo/registry /root/.cargo/git custom-std
 
-  # compile libunwind
-  if [[ "$TARGET" = "powerpc64le-unknown-linux-musl" ]]
-  then
-    cargo run --manifest-path /tmp/compile-libunwind/Cargo.toml -- --target "$TARGET" "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/src/rust/src/llvm-project/libunwind" out
-    cp out/libunwind*.a "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/"
-    rm -rf out /tmp/compile-libunwind
-  fi
 fi

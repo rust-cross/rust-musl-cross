@@ -123,7 +123,6 @@ RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
 ADD Xargo.toml /tmp/Xargo.toml
 ADD s390x-unwind.patch /tmp/s390x-unwind.patch
 ADD build-std.sh .
-COPY compile-libunwind /tmp/compile-libunwind
 RUN bash build-std.sh
 
 ENV RUSTUP_HOME=/root/.rustup
