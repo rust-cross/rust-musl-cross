@@ -117,7 +117,7 @@ RUN chmod 755 /root/ && \
     rustup component add --toolchain $TOOLCHAIN rustfmt clippy && \
     rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$GNU_TARGET/share/
 
-RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config
+RUN echo "[target.$TARGET]\nlinker = \"$TARGET-gcc\"\n" > /root/.cargo/config.toml
 
 # Build std sysroot for targets that doesn't have official std release
 ADD Xargo.toml /tmp/Xargo.toml
