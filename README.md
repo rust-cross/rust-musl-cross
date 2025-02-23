@@ -28,7 +28,7 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 | nightly        | mipsel-unknown-linux-musl        | mipsel-musl        |
 | nightly        | mips64-unknown-linux-muslabi64   | mips64-muslabi64   |
 | nightly        | mips64el-unknown-linux-muslabi64 | mips64el-muslabi64 |
-| nightly        | powerpc64le-unknown-linux-musl   | powerpc64le-musl   |
+| stable         | powerpc64le-unknown-linux-musl   | powerpc64le-musl   |
 | stable         | x86\_64-unknown-linux-musl       | x86\_64-musl       |
 
 To use `armv7-unknown-linux-musleabihf` target for example, first pull the image:

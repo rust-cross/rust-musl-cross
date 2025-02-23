@@ -49,7 +49,7 @@ RUN cd /tmp && \
     git clone --depth 1 https://github.com/richfelker/musl-cross-make.git && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
-    mkdir patches/musl-1.1.24 && \
+    mkdir -p patches/musl-1.1.24 && \
     cp /tmp/musl-patch-configure.diff patches/musl-1.1.24/0001-fix-cfi-detection.diff && \
     export CFLAGS="-fPIC -g1 $CFLAGS" && \
     export TARGET=$TARGET && \
