@@ -9,18 +9,18 @@ on:
     inputs:
       no_cache:
         description: Disable Docker cache, yes/no
-        default: 'no'
+        default: "no"
         required: false
       toolchain:
         description: Rust toolchain to install
-        default: 'stable'
+        default: "stable"
         required: false
       arch:
         description: Architectures to build for
-        default: ''
+        default: ""
         required: false
   schedule:
-    - cron: '0 0 1 */2 *'
+    - cron: "0 0 1 */2 *"
 
 name: Build
 
@@ -170,11 +170,11 @@ jobs:
           }}
       ARCH_MATRIX: |
         - arch: amd64
-          runner: [ubuntu-latest]
+          runner: ubuntu-latest
         - arch: arm64
-          runner: [self-hosted, ARM64]
+          runner: ubuntu-24.04-arm
         - arch: armv7
-          runner: [self-hosted, ARM64]
+          runner: ubuntu-24.04-arm
           docker_arch: arm/v7
       TARGET_MATRIX: |
         - IMAGE_TAG: aarch64-musl
@@ -211,6 +211,10 @@ jobs:
           TOOLCHAIN: stable
         - IMAGE_TAG: powerpc64le-musl
           TARGET: powerpc64le-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: stable
+        - IMAGE_TAG: riscv64gc-musl
+          TARGET: riscv64gc-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: mips-musl
@@ -335,7 +339,7 @@ jobs:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
           set -e
-          
+
           echo "image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG
           manifests:" > dockerhub-manifest.yaml
 
