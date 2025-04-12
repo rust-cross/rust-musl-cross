@@ -15,7 +15,7 @@ then
   fi
 
   cargo install xargo --git https://github.com/AverseABFun/xargo.git
-  cargo new --lib custom-std
+  cargo new --lib --edition 2021 custom-std
   cd custom-std
   cp /tmp/Xargo.toml .
   rustc -Z unstable-options --print target-spec-json --target "$TARGET" | tee "$TARGET.json"
