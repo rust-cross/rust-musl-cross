@@ -132,19 +132,19 @@ jobs:
         - IMAGE_TAG: mips-musl
           TARGET: mips-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
-          TOOLCHAIN: nightly
+          TOOLCHAIN: stable
         - IMAGE_TAG: mips64-muslabi64
           TARGET: mips64-unknown-linux-muslabi64
           RUST_MUSL_MAKE_CONFIG: config.mak
-          TOOLCHAIN: nightly
+          TOOLCHAIN: stable
         - IMAGE_TAG: mips64el-muslabi64
           TARGET: mips64el-unknown-linux-muslabi64
           RUST_MUSL_MAKE_CONFIG: config.mak
-          TOOLCHAIN: nightly
+          TOOLCHAIN: stable
         - IMAGE_TAG: mipsel-musl
           TARGET: mipsel-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
-          TOOLCHAIN: nightly
+          TOOLCHAIN: stable
         - IMAGE_TAG: s390x-musl
           TARGET: s390x-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
