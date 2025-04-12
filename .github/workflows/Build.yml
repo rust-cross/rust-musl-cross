@@ -1,10 +1,5 @@
 on:
-  push:
-    branches:
-      # for bors r+
-      - staging
-      # for bors try
-      - trying
+  pull_request:
   workflow_dispatch:
     inputs:
       no_cache:
@@ -48,11 +43,7 @@ jobs:
             const archMatrix = yaml.load(process.env.ARCH_MATRIX)
             const targetMatrix = yaml.load(process.env.TARGET_MATRIX)
 
-            if (context.eventName == 'schedule') {
-              // Always run on schedule
-              core.setOutput('arch', JSON.stringify(archMatrix))
-              core.setOutput('target', JSON.stringify(targetMatrix))
-            } else if (context.eventName == 'workflow_dispatch') {
+            if (context.eventName == 'workflow_dispatch') {
               let outputArchMatrix = []
               let outputTargetMatrix = []
               const dockerArch = context.payload.inputs.arch.split(',')
@@ -75,84 +66,9 @@ jobs:
               core.setOutput('arch', JSON.stringify(outputArchMatrix))
               core.setOutput('target', JSON.stringify(outputTargetMatrix))
               core.setOutput('fail-fast', 'false')
-            } else if (context.eventName == 'push') {
-              const commitMessage = process.env.COMMIT_MESSAGE.trim()
-              if (commitMessage.length > 0) {
-                let outputArchMatrix = []
-                let outputTargetMatrix = []
-
-                let borsArgs
-                if (commitMessage.startsWith('Try #')) {
-                  borsArgs = commitMessage.replace(/Try #[0-9]+:/i, '').trim()
-                } else {
-                  // Merge example commit message:
-                  // Merge #64
-                  //
-                  // 64: Refine bors command r=messense a=messense
-                  //
-                  // bors: amd64 --target aarch64
-                  //
-                  // Co-authored-by: messense <messense@icloud.com>
-                  //
-                  borsArgs = commitMessage
-                    .split('\n')
-                    .filter(item => item.trim().startsWith('bors:'))
-                    .join('\n')
-                    .trim()
-                }
-                const targetIndex = borsArgs.indexOf('--target')
-                let dockerArch = []
-                let targets = []
-
-                if (targetIndex === -1) {
-                  dockerArch = borsArgs.trim().split(' ').filter(x => x.length > 0)
-                  targets = []
-                } else {
-                  dockerArch = borsArgs.substring(0, targetIndex).trim().split(' ').filter(x => x.length > 0)
-                  targets = borsArgs.substring(targetIndex + '--target'.length).trim().split(' ')
-                }
-                if (dockerArch.length === 0) {
-                  // Defaults to all arches
-                  outputArchMatrix = archMatrix
-                } else {
-                  for (const arch of dockerArch) {
-                    outputArchMatrix.push(...archMatrix.filter(item => item.arch == arch))
-                  }
-                }
-                if (targets.length === 0) {
-                  // Defaults to all targets
-                  outputTargetMatrix = targetMatrix
-                } else {
-                  for (const target of targets) {
-                    outputTargetMatrix.push(...targetMatrix.filter(item => item.TARGET.startsWith(target)))
-                  }
-                }
-
-                core.setOutput('arch', JSON.stringify(outputArchMatrix))
-                core.setOutput('target', JSON.stringify(outputTargetMatrix))
-              } else {
-                core.setOutput('arch', JSON.stringify(archMatrix))
-                core.setOutput('target', JSON.stringify(targetMatrix))
-                core.setOutput('run-build', 'false')
-              }
-
-              const matches = commitMessage.match(/(Try|Merge) #([0-9]+):/)
-              if (matches) {
-                const prNumber = matches[2]
-                const { data: { labels: labels } } = await github.rest.pulls.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: prNumber
-                })
-                const labelNames = labels.map(label => label.name)
-                if (labelNames.includes('CI-no-fail-fast')) {
-                  core.setOutput('fail-fast', 'false')
-                }
-              }
             } else {
               core.setOutput('arch', JSON.stringify(archMatrix))
               core.setOutput('target', JSON.stringify(targetMatrix))
-              core.setOutput('run-build', 'false')
             }
       - name: Show build matrix
         run: |
@@ -170,11 +86,11 @@ jobs:
           }}
       ARCH_MATRIX: |
         - arch: amd64
-          runner: [ubuntu-latest]
+          runner: ubuntu-latest
         - arch: arm64
-          runner: [self-hosted, ARM64]
+          runner: ubuntu-24.04-arm
         - arch: armv7
-          runner: [self-hosted, ARM64]
+          runner: ubuntu-24.04-arm
           docker_arch: arm/v7
       TARGET_MATRIX: |
         - IMAGE_TAG: aarch64-musl
@@ -235,7 +151,7 @@ jobs:
           TOOLCHAIN: nightly
         - IMAGE_TAG: riscv64gc-musl
           TARGET: riscv64gc-unknown-linux-musl
-          MUST_TARGET: riscv64-unknown-linux-musl
+          MUSL_TARGET: riscv64-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: x86_64-musl
@@ -256,11 +172,6 @@ jobs:
     env: ${{ matrix.env }}
     steps:
       - uses: actions/checkout@v4
-      - name: Setup QEMU
-        uses: dbhi/qus/action@main
-        if: ${{ contains(matrix.os.runner, 'ubuntu-latest') }}
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
         if: ${{ github.repository_owner == 'rust-cross' }}
         uses: docker/login-action@v3
@@ -273,6 +184,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - name: docker build
         uses: docker/build-push-action@v6
         with:
@@ -295,6 +210,7 @@ jobs:
             -v "$(pwd)/tests":/home/rust/src \
             ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
       - name: Build and push multiarch image
+        if: ${{ github.event_name != 'pull_request' }}
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
@@ -336,7 +252,7 @@ jobs:
           sed -n '1d;p' ghcr-manifest.yaml >> ghcr-manifest-target.yaml
           ./manifest-tool push from-spec ghcr-manifest-target.yaml
       - name: Sync images to Docker Hub
-        if: ${{ github.repository_owner == 'rust-cross' }}
+        if: ${{ github.repository_owner == 'rust-cross' && github.event_name != 'pull_request' }}
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
         run: |
