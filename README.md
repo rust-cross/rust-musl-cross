@@ -29,20 +29,21 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 | stable         | mips64-unknown-linux-muslabi64   | mips64-muslabi64   |
 | stable         | mips64el-unknown-linux-muslabi64 | mips64el-muslabi64 |
 | stable         | powerpc64le-unknown-linux-musl   | powerpc64le-musl   |
+| stable         | riscv64gc-unknown-linux-musl     | riscv64gc-musl     |
 | stable         | x86\_64-unknown-linux-musl       | x86\_64-musl       |
 
 To use `armv7-unknown-linux-musleabihf` target for example, first pull the image:
 
 ```bash
-docker pull messense/rust-musl-cross:armv7-musleabihf
-# Also available on ghcr.io
-# docker pull ghcr.io/rust-cross/rust-musl-cross:armv7-musleabihf
+docker pull ghcr.io/rust-cross/rust-musl-cross:armv7-musleabihf
+# Also available on Docker Hub
+# docker pull messense/rust-musl-cross:armv7-musleabihf
 ```
 
 Then you can do:
 
 ```bash
-alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf'
+alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src ghcr.io/rust-cross/rust-musl-cross:armv7-musleabihf'
 rust-musl-builder cargo build --release
 ```
 
@@ -61,7 +62,7 @@ Currently we install stable Rust by default, if you want to switch to beta/night
 from our Docker image, for example to use beta Rust for target `x86_64-unknown-linux-musl`:
 
 ```dockerfile
-FROM messense/rust-musl-cross:x86_64-musl
+FROM ghcr.io/rust-cross/rust-musl-cross:x86_64-musl
 RUN rustup update beta && \
     rustup target add --toolchain beta x86_64-unknown-linux-musl
 ```
@@ -71,7 +72,7 @@ RUN rustup update beta && \
 You can use the `musl-strip` command inside the image to strip binaries, for example:
 
 ```bash
-docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf musl-strip /home/rust/src/target/release/example
+docker run --rm -it -v "$(pwd)":/home/rust/src ghcr.io/rust-cross/rust-musl-cross:armv7-musleabihf musl-strip /home/rust/src/target/release/example
 ```
 
 [musl-libc]: http://www.musl-libc.org/
