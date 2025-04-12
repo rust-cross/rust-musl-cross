@@ -165,7 +165,7 @@ jobs:
     if: ${{ needs.setup.outputs.run-build != 'false' }}
     needs: setup
     strategy:
-      fail-fast: ${{ needs.setup.outputs.fail-fast != 'false' }}
+      fail-fast: ${{ needs.setup.outputs.fail-fast != 'false' || !contains(github.event.pull_request.labels.*.name, 'CI-no-fail-fast') }}
       matrix:
         os: ${{ fromJson(needs.setup.outputs.arch) }}
         env: ${{ fromJson(needs.setup.outputs.target) }}
