@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-if [[ "$TOOLCHAIN" = "nightly" && ("$TARGET" =~ ^mips || "$TARGET" =~ ^s390x) ]]
+if [[ "$TOOLCHAIN" = "nightly" && ("$TARGET" =~ ^s390x) ]]
 then
   export CARGO_NET_GIT_FETCH_WITH_CLI=true
   export CARGO_UNSTABLE_SPARSE_REGISTRY=true
@@ -15,7 +15,7 @@ then
   fi
 
   cargo install xargo --git https://github.com/AverseABFun/xargo.git
-  cargo new --lib custom-std
+  cargo new --lib --edition 2021 custom-std
   cd custom-std
   cp /tmp/Xargo.toml .
   rustc -Z unstable-options --print target-spec-json --target "$TARGET" | tee "$TARGET.json"
