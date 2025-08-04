@@ -21,7 +21,7 @@ OUTPUT = /usr/local/musl
 # https://github.com/messense/rust-musl-cross/pull/67#issuecomment-1251905512
 GCC_VER = 9.4.0
 
-MUSL_VER = 1.2.3
+MUSL_VER = 1.2.5
 
 # GMP_VER =
 # MPC_VER =
