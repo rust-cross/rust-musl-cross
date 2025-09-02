@@ -172,7 +172,7 @@ jobs:
         env: ${{ fromJson(needs.setup.outputs.target) }}
     env: ${{ matrix.env }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Login to DockerHub
         if: ${{ github.repository_owner == 'rust-cross' }}
         uses: docker/login-action@v3
