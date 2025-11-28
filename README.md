@@ -25,6 +25,7 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 | stable         | i586-unknown-linux-musl          | i586-musl          |
 | stable         | i686-unknown-linux-musl          | i686-musl          |
 | stable         | mips-unknown-linux-musl          | mips-musl          |
+| stable         | loongarch64-unknown-linux-musl   | loongarch64-musl   |
 | stable         | mipsel-unknown-linux-musl        | mipsel-musl        |
 | stable         | mips64-unknown-linux-muslabi64   | mips64-muslabi64   |
 | stable         | mips64el-unknown-linux-muslabi64 | mips64el-muslabi64 |
