@@ -178,7 +178,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Login to DockerHub
-        if: ${{ github.repository_owner == 'rust-cross' }}
+        if: ${{ github.repository_owner == 'rust-cross' && github.event_name != 'pull_request' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
