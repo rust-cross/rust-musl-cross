@@ -1,5 +1,0 @@
-[dependencies.std]
-[dependencies.alloc]
-[dependencies.panic_abort]
-[dependencies.panic_unwind]
-[dependencies.proc_macro]
