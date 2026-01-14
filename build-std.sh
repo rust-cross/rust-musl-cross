@@ -22,13 +22,18 @@ then
   
   # Build the sysroot using rustc-build-sysroot
   # Find the GCC library directory dynamically (using the highest version)
-  GCC_LIB_DIR=$(find /usr/local/musl/lib/gcc/"$TARGET" -maxdepth 1 -type d -name "[0-9]*" | sort -V | tail -n 1)
+  if [ -d "/usr/local/musl/lib/gcc/$TARGET" ]; then
+    GCC_LIB_DIR=$(find /usr/local/musl/lib/gcc/"$TARGET" -maxdepth 1 -type d -name "[0-9]*" | sort -V | tail -n 1)
+  else
+    GCC_LIB_DIR=""
+  fi
+  
   if [ -z "$GCC_LIB_DIR" ]; then
     echo "Warning: GCC library directory not found, using default RUSTFLAGS"
     export RUSTFLAGS="-L/usr/local/musl/$TARGET/lib"
   else
     echo "Found GCC library directory: $GCC_LIB_DIR"
-    export RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L$GCC_LIB_DIR/"
+    export RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L$GCC_LIB_DIR"
   fi
   ./target/release/build-sysroot "$TARGET"
   
