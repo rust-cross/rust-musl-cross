@@ -114,8 +114,8 @@ RUN chmod 755 /root/ && \
 RUN echo "[target.$TARGET]\nlinker = \"$TARGET_CC\"\n" > /root/.cargo/config.toml
 
 # Build std sysroot for targets that doesn't have official std release
-ADD Xargo.toml /tmp/Xargo.toml
 ADD s390x-unwind.patch /tmp/s390x-unwind.patch
+ADD build-sysroot /home/rust/src/build-sysroot
 ADD build-std.sh .
 RUN bash build-std.sh
 
