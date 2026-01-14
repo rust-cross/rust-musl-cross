@@ -13,6 +13,7 @@ fn main() -> Result<()> {
         .context("TARGET not specified")?;
 
     // Get rustflags from environment if set
+    // Note: This uses split_whitespace(), so quoted arguments are not supported
     let rustflags_str = env::var("RUSTFLAGS").unwrap_or_default();
     let rustflags: Vec<OsString> = if rustflags_str.is_empty() {
         Vec::new()
@@ -27,7 +28,7 @@ fn main() -> Result<()> {
     let rustc_output = Command::new("rustc")
         .args(["--print", "sysroot"])
         .output()
-        .context("failed to run rustc")?;
+        .context("failed to run rustc --print sysroot to determine sysroot path")?;
     
     let sysroot_base = String::from_utf8_lossy(&rustc_output.stdout)
         .trim()
@@ -61,7 +62,8 @@ fn main() -> Result<()> {
         builder = builder.rustflags(rustflags);
     }
 
-    builder.build_from_source(&src_dir)?;
+    builder.build_from_source(&src_dir)
+        .context("failed to build sysroot from source")?;
 
     println!("Sysroot built successfully!");
     Ok(())
