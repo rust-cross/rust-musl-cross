@@ -21,13 +21,26 @@ then
   cargo build --release
   
   # Build the sysroot using rustc-build-sysroot
-  export RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L/usr/local/musl/lib/gcc/$TARGET/11.2.0/"
+  # Find the GCC library directory dynamically
+  GCC_LIB_DIR=$(find /usr/local/musl/lib/gcc/"$TARGET" -maxdepth 1 -type d -name "[0-9]*" | head -n 1)
+  if [ -z "$GCC_LIB_DIR" ]; then
+    echo "Warning: GCC library directory not found, using default RUSTFLAGS"
+    export RUSTFLAGS="-L/usr/local/musl/$TARGET/lib"
+  else
+    echo "Found GCC library directory: $GCC_LIB_DIR"
+    export RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L$GCC_LIB_DIR/"
+  fi
   ./target/release/build-sysroot "$TARGET"
   
   # Copy self-contained objects
   mkdir -p "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained"
   cp /usr/local/musl/"$TARGET"/lib/*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
-  cp /usr/local/musl/lib/gcc/"$TARGET"/11.2.0/c*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
+  # Copy GCC C runtime objects if they exist
+  if [ -n "$GCC_LIB_DIR" ] && ls "$GCC_LIB_DIR"/c*.o 1> /dev/null 2>&1; then
+    cp "$GCC_LIB_DIR"/c*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
+  else
+    echo "Warning: GCC C runtime objects not found, skipping"
+  fi
   
   # Cleanup
   cd /tmp
