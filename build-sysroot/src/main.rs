@@ -30,6 +30,13 @@ fn main() -> Result<()> {
         .output()
         .context("failed to run rustc --print sysroot to determine sysroot path")?;
     
+    if !rustc_output.status.success() {
+        anyhow::bail!(
+            "rustc --print sysroot failed: {}",
+            String::from_utf8_lossy(&rustc_output.stderr)
+        );
+    }
+    
     let sysroot_base = String::from_utf8_lossy(&rustc_output.stdout)
         .trim()
         .to_string();
