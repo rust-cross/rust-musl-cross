@@ -14,17 +14,23 @@ then
 	cd -
   fi
 
-  cargo install xargo --git https://github.com/AverseABFun/xargo.git
-  cargo new --lib --edition 2021 custom-std
-  cd custom-std
-  cp /tmp/Xargo.toml .
-  rustc -Z unstable-options --print target-spec-json --target "$TARGET" | tee "$TARGET.json"
-  RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L/usr/local/musl/lib/gcc/$TARGET/11.2.0/" xargo build --target "$TARGET"
-  cp -r "/root/.xargo/lib/rustlib/$TARGET" "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/"
-  mkdir "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained"
+  # Build and install the sysroot builder tool
+  cd /tmp
+  cp -r /home/rust/src/build-sysroot .
+  cd build-sysroot
+  cargo build --release
+  
+  # Build the sysroot using rustc-build-sysroot
+  export RUSTFLAGS="-L/usr/local/musl/$TARGET/lib -L/usr/local/musl/lib/gcc/$TARGET/11.2.0/"
+  ./target/release/build-sysroot "$TARGET"
+  
+  # Copy self-contained objects
+  mkdir -p "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained"
   cp /usr/local/musl/"$TARGET"/lib/*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
   cp /usr/local/musl/lib/gcc/"$TARGET"/11.2.0/c*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
-  cd ..
-  rm -rf /root/.xargo /root/.cargo/registry /root/.cargo/git custom-std
+  
+  # Cleanup
+  cd /tmp
+  rm -rf build-sysroot /root/.cargo/registry /root/.cargo/git
 
 fi
