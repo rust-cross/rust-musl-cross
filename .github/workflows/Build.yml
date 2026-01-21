@@ -209,10 +209,17 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }},mode=max
       - name: Test Docker cargo build
-        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') && !startsWith(matrix.env.TARGET, 'riscv64') }}
+        if: ${{ matrix.os.arch != 'armv7' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') && !startsWith(matrix.env.TARGET, 'riscv64') }}
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
+            ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
+      - name: Test Docker cargo build (s390x)
+        if: ${{ matrix.os.arch != 'armv7' && startsWith(matrix.env.TARGET, 's390x') }}
+        run: |
+          docker run --rm \
+            -v "$(pwd)/tests":/home/rust/src \
+            -e CFLAGS="-march=z10 -mzarch" \
             ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG-${{ matrix.os.arch }} bash -c "cargo build"
       - name: Build and push multiarch image
         if: ${{ github.event_name != 'pull_request' }}

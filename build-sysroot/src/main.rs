@@ -48,10 +48,7 @@ fn main() -> Result<()> {
         .join("rust")
         .join("library");
     
-    let sysroot_dir = PathBuf::from(&sysroot_base)
-        .join("lib")
-        .join("rustlib")
-        .join(&target);
+    let sysroot_dir = PathBuf::from(&sysroot_base);
 
     println!("Building sysroot for target: {}", target);
     println!("Source directory: {}", src_dir.display());
