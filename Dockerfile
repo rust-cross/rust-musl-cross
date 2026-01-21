@@ -117,7 +117,7 @@ RUN echo "[target.$TARGET]\nlinker = \"$TARGET_CC\"\n" > /root/.cargo/config.tom
 ADD s390x-unwind.patch /tmp/s390x-unwind.patch
 ADD build-sysroot /home/rust/src/build-sysroot
 ADD build-std.sh .
-RUN TARGET=$TARGET MUSL_TARGET=$MUSL_TARGET TOOLCHAIN=$TOOLCHAIN bash build-std.sh
+RUN bash build-std.sh
 
 ENV RUSTUP_HOME=/root/.rustup
 ENV CARGO_HOME=/root/.cargo
