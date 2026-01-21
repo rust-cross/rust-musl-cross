@@ -152,6 +152,7 @@ jobs:
         #   TOOLCHAIN: stable
         - IMAGE_TAG: s390x-musl
           TARGET: s390x-unknown-linux-musl
+          MUSL_TARGET: s390x-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: nightly
         - IMAGE_TAG: riscv64gc-musl
