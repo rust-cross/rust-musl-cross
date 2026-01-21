@@ -152,7 +152,6 @@ jobs:
         #   TOOLCHAIN: stable
         - IMAGE_TAG: s390x-musl
           TARGET: s390x-unknown-linux-musl
-          MUSL_TARGET: s390x-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: nightly
         - IMAGE_TAG: riscv64gc-musl
@@ -210,7 +209,7 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }},mode=max
       - name: Test Docker cargo build
-        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') && !startsWith(matrix.env.TARGET, 'riscv64') }}
+        if: ${{ matrix.os.arch == 'amd64' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 'riscv64') }}
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
