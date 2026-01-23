@@ -27,9 +27,10 @@ Currently we have the following [prebuilt Docker images on Docker Hub](https://h
 | stable         | mips-unknown-linux-musl          | mips-musl          |
 | stable         | loongarch64-unknown-linux-musl   | loongarch64-musl   |
 | stable         | mipsel-unknown-linux-musl        | mipsel-musl        |
+| nightly        | powerpc64-unknown-linux-musl     | powerpc64-musl      |
+| stable         | powerpc64le-unknown-linux-musl   | powerpc64le-musl   |
 | stable         | mips64-unknown-linux-muslabi64   | mips64-muslabi64   |
 | stable         | mips64el-unknown-linux-muslabi64 | mips64el-muslabi64 |
-| stable         | powerpc64le-unknown-linux-musl   | powerpc64le-musl   |
 | stable         | riscv64gc-unknown-linux-musl     | riscv64gc-musl     |
 | stable         | x86\_64-unknown-linux-musl       | x86\_64-musl       |
 
