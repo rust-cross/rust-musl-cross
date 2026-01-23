@@ -1,20 +1,4 @@
-#![allow(warnings)] // remove when error_chain is fixed
-
-//! `cargo run --example simple`
-
-extern crate reqwest;
-extern crate env_logger;
-#[macro_use]
-extern crate error_chain;
-
-error_chain! {
-    foreign_links {
-        ReqError(reqwest::Error);
-        IoError(std::io::Error);
-    }
-}
-
-fn run() -> Result<()> {
+fn run() -> anyhow::Result<()> {
     env_logger::init();
 
     println!("GET https://www.rust-lang.org");
@@ -31,4 +15,6 @@ fn run() -> Result<()> {
     Ok(())
 }
 
-quick_main!(run);
+fn main() {
+    run().unwrap();
+}

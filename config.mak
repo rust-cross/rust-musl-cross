@@ -16,12 +16,9 @@ OUTPUT = /usr/local/musl
 # headers, which are not needed unless compiling programs that use them.
 
 # BINUTILS_VER =
-GCC_VER = 11.2.0
+GCC_VER = 12.4.0
 
-# https://github.com/rust-embedded/cross/issues/478
-# https://github.com/rust-lang/libc/issues/1848
-
-MUSL_VER = 1.1.24
+MUSL_VER = 1.2.5
 
 # GMP_VER =
 # MPC_VER =

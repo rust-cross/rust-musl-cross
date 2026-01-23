@@ -23,15 +23,14 @@ error: aborting due to previous error
 
 --- a/library/unwind/src/lib.rs
 +++ b/library/unwind/src/lib.rs
-@@ -51,7 +51,10 @@
-         #[link(name = "unwind", cfg(not(target_feature = "crt-static")))]
-         extern "C" {}
-     } else {
+@@ -74,7 +74,10 @@
+     }
+     _ => {
 -        #[link(name = "unwind", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
 +        // on musl gcc_eh needs pthread_once from libc
 +        #[link(name = "gcc_eh", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
 +        #[link(name = "c", kind = "static", modifiers = "-bundle", cfg(target_feature = "crt-static"))]
-+        extern "C" {}
-         #[link(name = "gcc_s", cfg(not(target_feature = "crt-static")))]
-         extern "C" {}
++        unsafe extern "C" {}
+         #[link(name = "gcc_s", cfg(all(not(target_feature = "crt-static"), not(target_arch = "hexagon"))))]
+         unsafe extern "C" {}
      }

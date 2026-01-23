@@ -1,0 +1,8 @@
+[package]
+name = "build-sysroot"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rustc-build-sysroot = "0.5"
+anyhow = "1.0"
