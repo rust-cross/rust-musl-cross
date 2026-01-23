@@ -128,7 +128,7 @@ jobs:
           TOOLCHAIN: stable
         - IMAGE_TAG: loongarch64-musl
           TARGET: loongarch64-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.loongarch64
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: powerpc64le-musl
           TARGET: powerpc64le-unknown-linux-musl
