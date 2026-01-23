@@ -1,8 +1,8 @@
 # rust-musl-cross
 
 [![Docker Image](https://img.shields.io/docker/pulls/messense/rust-musl-cross.svg?maxAge=2592000)](https://hub.docker.com/r/messense/rust-musl-cross/)
-[![Build](https://github.com/messense/rust-musl-cross/workflows/Build/badge.svg)](https://github.com/messense/rust-musl-cross/actions?query=workflow%3ABuild)
-[![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/48252)
+[![Build](https://github.com/rust-cross/rust-musl-cross/workflows/Build/badge.svg)](https://github.com/rust-cross/rust-musl-cross/actions?query=workflow%3ABuild)
+[![Bors enabled](https://bors.tech/images/badge_small.svg)](https://app.bors.tech/repositories/58197)
 
 > 🚀 Help me to become a full-time open-source developer by [sponsoring me on GitHub](https://github.com/sponsors/messense)
 
@@ -14,36 +14,37 @@ inspired by [rust-musl-builder](https://github.com/emk/rust-musl-builder)
 Currently we have the following [prebuilt Docker images on Docker Hub](https://hub.docker.com/r/messense/rust-musl-cross/),
  supports x86_64(amd64) and aarch64(arm64) architectures.
 
-| Rust toolchain | Cross Compile Target                        | Docker Image Tag    |
-|----------------|---------------------------------------------|---------------------|
-| stable         | aarch64-unknown-linux-musl                  | aarch64-musl        |
-| stable         | arm-unknown-linux-musleabi                  | arm-musleabi        |
-| stable         | arm-unknown-linux-musleabihf                | arm-musleabihf      |
-| stable         | armv5te-unknown-linux-musleabi              | armv5te-musleabi    |
-| stable         | armv7-unknown-linux-musleabi                | armv7-musleabi      |
-| stable         | armv7-unknown-linux-musleabihf              | armv7-musleabihf    |
-| stable         | i586-unknown-linux-musl                     | i586-musl           |
-| stable         | i686-unknown-linux-musl                     | i686-musl           |
-| stable         | mips-unknown-linux-musl                     | mips-musl           |
-| stable         | mipsel-unknown-linux-musl                   | mipsel-musl         |
-| stable         | mips64-unknown-linux-muslabi64              | mips64-muslabi64    |
-| stable         | mips64el-unknown-linux-muslabi64            | mips64el-muslabi64  |
-| nightly        | powerpc64-unknown-linux-musl                | powerpc64-musl      |
-| nightly        | powerpc64le-unknown-linux-musl              | powerpc64le-musl    |
-| stable         | x86\_64-unknown-linux-musl                  | x86\_64-musl        |
+| Rust toolchain | Cross Compile Target             | Docker Image Tag   |
+| -------------- | -------------------------------- | ------------------ |
+| stable         | aarch64-unknown-linux-musl       | aarch64-musl       |
+| stable         | arm-unknown-linux-musleabi       | arm-musleabi       |
+| stable         | arm-unknown-linux-musleabihf     | arm-musleabihf     |
+| stable         | armv5te-unknown-linux-musleabi   | armv5te-musleabi   |
+| stable         | armv7-unknown-linux-musleabi     | armv7-musleabi     |
+| stable         | armv7-unknown-linux-musleabihf   | armv7-musleabihf   |
+| stable         | i586-unknown-linux-musl          | i586-musl          |
+| stable         | i686-unknown-linux-musl          | i686-musl          |
+| stable         | mips-unknown-linux-musl          | mips-musl          |
+| stable         | loongarch64-unknown-linux-musl   | loongarch64-musl   |
+| stable         | mipsel-unknown-linux-musl        | mipsel-musl        |
+| stable         | mips64-unknown-linux-muslabi64   | mips64-muslabi64   |
+| stable         | mips64el-unknown-linux-muslabi64 | mips64el-muslabi64 |
+| stable         | powerpc64le-unknown-linux-musl   | powerpc64le-musl   |
+| stable         | riscv64gc-unknown-linux-musl     | riscv64gc-musl     |
+| stable         | x86\_64-unknown-linux-musl       | x86\_64-musl       |
 
 To use `armv7-unknown-linux-musleabihf` target for example, first pull the image:
 
 ```bash
-docker pull messense/rust-musl-cross:armv7-musleabihf
-# Also available on ghcr.io
-# docker pull ghcr.io/messense/rust-musl-cross:armv7-musleabihf
+docker pull ghcr.io/rust-cross/rust-musl-cross:armv7-musleabihf
+# Also available on Docker Hub
+# docker pull messense/rust-musl-cross:armv7-musleabihf
 ```
 
 Then you can do:
 
 ```bash
-alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf'
+alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src ghcr.io/rust-cross/rust-musl-cross:armv7-musleabihf'
 rust-musl-builder cargo build --release
 ```
 
@@ -62,7 +63,7 @@ Currently we install stable Rust by default, if you want to switch to beta/night
 from our Docker image, for example to use beta Rust for target `x86_64-unknown-linux-musl`:
 
 ```dockerfile
-FROM messense/rust-musl-cross:x86_64-musl
+FROM ghcr.io/rust-cross/rust-musl-cross:x86_64-musl
 RUN rustup update beta && \
     rustup target add --toolchain beta x86_64-unknown-linux-musl
 ```
@@ -72,7 +73,7 @@ RUN rustup update beta && \
 You can use the `musl-strip` command inside the image to strip binaries, for example:
 
 ```bash
-docker run --rm -it -v "$(pwd)":/home/rust/src messense/rust-musl-cross:armv7-musleabihf musl-strip /home/rust/src/target/release/example
+docker run --rm -it -v "$(pwd)":/home/rust/src ghcr.io/rust-cross/rust-musl-cross:armv7-musleabihf musl-strip /home/rust/src/target/release/example
 ```
 
 [musl-libc]: http://www.musl-libc.org/
