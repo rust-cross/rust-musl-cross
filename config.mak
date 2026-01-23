@@ -18,7 +18,7 @@ OUTPUT = /usr/local/musl
 # BINUTILS_VER =
 GCC_VER = 12.4.0
 
-MUSL_VER = 1.2.3
+MUSL_VER = 1.2.5
 
 # GMP_VER =
 # MPC_VER =
