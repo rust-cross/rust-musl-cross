@@ -138,22 +138,26 @@ jobs:
           TARGET: powerpc64le-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
-        # - IMAGE_TAG: mips-musl
-        #   TARGET: mips-unknown-linux-musl
-        #   RUST_MUSL_MAKE_CONFIG: config.mak
-        #   TOOLCHAIN: stable
-        # - IMAGE_TAG: mips64-muslabi64
-        #   TARGET: mips64-unknown-linux-muslabi64
-        #   RUST_MUSL_MAKE_CONFIG: config.mak
-        #   TOOLCHAIN: stable
-        # - IMAGE_TAG: mips64el-muslabi64
-        #   TARGET: mips64el-unknown-linux-muslabi64
-        #   RUST_MUSL_MAKE_CONFIG: config.mak
-        #   TOOLCHAIN: stable
-        # - IMAGE_TAG: mipsel-musl
-        #   TARGET: mipsel-unknown-linux-musl
-        #   RUST_MUSL_MAKE_CONFIG: config.mak
-        #   TOOLCHAIN: stable
+        - IMAGE_TAG: mips-musl
+          TARGET: mips-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: nightly
+        - IMAGE_TAG: mips64-openwrt-musl
+          TARGET: mips64-openwrt-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: nightly
+        - IMAGE_TAG: mips64-muslabi64
+          TARGET: mips64-unknown-linux-muslabi64
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: nightly
+        - IMAGE_TAG: mips64el-muslabi64
+          TARGET: mips64el-unknown-linux-muslabi64
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: nightly
+        - IMAGE_TAG: mipsel-musl
+          TARGET: mipsel-unknown-linux-musl
+          RUST_MUSL_MAKE_CONFIG: config.mak
+          TOOLCHAIN: nightly
         - IMAGE_TAG: s390x-musl
           TARGET: s390x-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
@@ -213,7 +217,8 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }}
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/rust-musl-cross:buildcache-${{ matrix.env.IMAGE_TAG }}-${{ matrix.os.arch }},mode=max
       - name: Test Docker cargo build
-        if: ${{ matrix.os.arch != 'armv7' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') && !startsWith(matrix.env.TARGET, 'riscv64') }}
+        # OpenWrt target isn't supported in openssl-src yet
+        if: ${{ matrix.os.arch != 'armv7' && !startsWith(matrix.env.TARGET, 'armv5te') && !startsWith(matrix.env.TARGET, 's390x') && !startsWith(matrix.env.TARGET, 'riscv64') && !startsWith(matrix.env.TARGET, 'mips64-openwrt') }}
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \

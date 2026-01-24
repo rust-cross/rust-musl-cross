@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-if [[ "$TOOLCHAIN" = "nightly" && ("$TARGET" =~ ^s390x || "$TARGET" = "powerpc64-unknown-linux-musl") ]]
+if [[ "$TOOLCHAIN" = "nightly" && ("$TARGET" =~ ^s390x || "$TARGET" = "powerpc64-unknown-linux-musl" || "$TARGET" =~ ^mips) ]]
 then
   export CARGO_NET_GIT_FETCH_WITH_CLI=true
   export CARGO_UNSTABLE_SPARSE_REGISTRY=true
@@ -46,6 +46,12 @@ then
       cp "$GCC_LIB_DIR"/c*.o "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/"
     else
       echo "Warning: GCC C runtime objects not found in $GCC_LIB_DIR, skipping"
+    fi
+    # For MIPS targets: create libunwind.a from libgcc.a since musl doesn't ship libunwind
+    # The unwind symbols are provided by libgcc on these platforms
+    if [[ "$TARGET" =~ ^mips ]] && [ -f "$GCC_LIB_DIR/libgcc.a" ]; then
+      echo "Creating libunwind.a from libgcc.a for MIPS target"
+      cp "$GCC_LIB_DIR/libgcc.a" "/root/.rustup/toolchains/$TOOLCHAIN-$HOST/lib/rustlib/$TARGET/lib/self-contained/libunwind.a"
     fi
   else
     echo "Warning: GCC library directory not found, skipping C runtime objects"
