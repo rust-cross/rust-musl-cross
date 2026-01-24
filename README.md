@@ -14,25 +14,27 @@ inspired by [rust-musl-builder](https://github.com/emk/rust-musl-builder)
 Currently we have the following [prebuilt Docker images on Docker Hub](https://hub.docker.com/r/messense/rust-musl-cross/),
  supports x86_64(amd64) and aarch64(arm64) architectures.
 
-| Rust toolchain | Cross Compile Target             | Docker Image Tag   |
-| -------------- | -------------------------------- | ------------------ |
-| stable         | aarch64-unknown-linux-musl       | aarch64-musl       |
-| stable         | arm-unknown-linux-musleabi       | arm-musleabi       |
-| stable         | arm-unknown-linux-musleabihf     | arm-musleabihf     |
-| stable         | armv5te-unknown-linux-musleabi   | armv5te-musleabi   |
-| stable         | armv7-unknown-linux-musleabi     | armv7-musleabi     |
-| stable         | armv7-unknown-linux-musleabihf   | armv7-musleabihf   |
-| stable         | i586-unknown-linux-musl          | i586-musl          |
-| stable         | i686-unknown-linux-musl          | i686-musl          |
-| stable         | mips-unknown-linux-musl          | mips-musl          |
-| stable         | loongarch64-unknown-linux-musl   | loongarch64-musl   |
-| stable         | mipsel-unknown-linux-musl        | mipsel-musl        |
+| Rust toolchain | Cross Compile Target             | Docker Image Tag    |
+| -------------- | -------------------------------- | ------------------- |
+| stable         | aarch64-unknown-linux-musl       | aarch64-musl        |
+| stable         | arm-unknown-linux-musleabi       | arm-musleabi        |
+| stable         | arm-unknown-linux-musleabihf     | arm-musleabihf      |
+| stable         | armv5te-unknown-linux-musleabi   | armv5te-musleabi    |
+| stable         | armv7-unknown-linux-musleabi     | armv7-musleabi      |
+| stable         | armv7-unknown-linux-musleabihf   | armv7-musleabihf    |
+| stable         | i586-unknown-linux-musl          | i586-musl           |
+| stable         | i686-unknown-linux-musl          | i686-musl           |
+| stable         | loongarch64-unknown-linux-musl   | loongarch64-musl    |
+| nightly        | mips-unknown-linux-musl          | mips-musl           |
+| nightly        | mips64-openwrt-linux-musl        | mips64-openwrt-musl |
+| nightly        | mips64-unknown-linux-muslabi64   | mips64-muslabi64    |
+| nightly        | mips64el-unknown-linux-muslabi64 | mips64el-muslabi64  |
+| nightly        | mipsel-unknown-linux-musl        | mipsel-musl         |
 | nightly        | powerpc64-unknown-linux-musl     | powerpc64-musl      |
-| stable         | powerpc64le-unknown-linux-musl   | powerpc64le-musl   |
-| stable         | mips64-unknown-linux-muslabi64   | mips64-muslabi64   |
-| stable         | mips64el-unknown-linux-muslabi64 | mips64el-muslabi64 |
-| stable         | riscv64gc-unknown-linux-musl     | riscv64gc-musl     |
-| stable         | x86\_64-unknown-linux-musl       | x86\_64-musl       |
+| stable         | powerpc64le-unknown-linux-musl   | powerpc64le-musl    |
+| stable         | riscv64gc-unknown-linux-musl     | riscv64gc-musl      |
+| nightly        | s390x-unknown-linux-musl         | s390x-musl          |
+| stable         | x86\_64-unknown-linux-musl       | x86\_64-musl        |
 
 To use `armv7-unknown-linux-musleabihf` target for example, first pull the image:
 
