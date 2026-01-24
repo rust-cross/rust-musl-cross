@@ -12,7 +12,7 @@ on:
         required: false
       arch:
         description: Architectures to build for
-        default: ""
+        default: "amd64,arm64,armv7"
         required: false
   schedule:
     - cron: "0 0 1 */2 *"
