@@ -96,7 +96,7 @@ jobs:
       TARGET_MATRIX: |
         - IMAGE_TAG: aarch64-musl
           TARGET: aarch64-unknown-linux-musl
-          RUST_MUSL_MAKE_CONFIG: config.mak.aarch64
+          RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
         - IMAGE_TAG: arm-musleabi
           TARGET: arm-unknown-linux-musleabi
