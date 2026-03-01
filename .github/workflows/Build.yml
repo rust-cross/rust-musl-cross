@@ -167,6 +167,7 @@ jobs:
           MUSL_TARGET: riscv64-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
+          IMAGE_TAG_ALIAS: riscv64-musl
         - IMAGE_TAG: x86_64-musl
           TARGET: x86_64-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
@@ -272,6 +273,12 @@ jobs:
           echo "image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$TARGET" > ghcr-manifest-target.yaml
           sed -n '1d;p' ghcr-manifest.yaml >> ghcr-manifest-target.yaml
           ./manifest-tool push from-spec ghcr-manifest-target.yaml
+
+          if [ -n "$IMAGE_TAG_ALIAS" ]; then
+            echo "image: ghcr.io/${{ github.repository_owner }}/rust-musl-cross:$IMAGE_TAG_ALIAS" > ghcr-manifest-alias.yaml
+            sed -n '1d;p' ghcr-manifest.yaml >> ghcr-manifest-alias.yaml
+            ./manifest-tool push from-spec ghcr-manifest-alias.yaml
+          fi
       - name: Sync images to Docker Hub
         if: ${{ github.repository_owner == 'rust-cross' && github.event_name != 'pull_request' }}
         env:
@@ -309,6 +316,12 @@ jobs:
 
           cat dockerhub-manifest.yaml
           ./manifest-tool push from-spec dockerhub-manifest.yaml
+
+          if [ -n "$IMAGE_TAG_ALIAS" ]; then
+            echo "image: ${{ secrets.DOCKER_USERNAME }}/rust-musl-cross:$IMAGE_TAG_ALIAS" > dockerhub-manifest-alias.yaml
+            sed -n '1d;p' dockerhub-manifest.yaml >> dockerhub-manifest-alias.yaml
+            ./manifest-tool push from-spec dockerhub-manifest-alias.yaml
+          fi
 
   conclusion:
     needs: [setup, build]
