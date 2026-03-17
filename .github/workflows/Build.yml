@@ -98,6 +98,7 @@ jobs:
           TARGET: aarch64-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
+          IMAGE_TAG_ALIAS: arm64-musl
         - IMAGE_TAG: arm-musleabi
           TARGET: arm-unknown-linux-musleabi
           RUST_MUSL_MAKE_CONFIG: config.mak
@@ -126,18 +127,22 @@ jobs:
           TARGET: i686-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
+          IMAGE_TAG_ALIAS: 386-musl
         - IMAGE_TAG: loongarch64-musl
           TARGET: loongarch64-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
+          IMAGE_TAG_ALIAS: loong64-musl
         - IMAGE_TAG: powerpc64-musl
           TARGET: powerpc64-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: nightly
+          IMAGE_TAG_ALIAS: ppc64-musl
         - IMAGE_TAG: powerpc64le-musl
           TARGET: powerpc64le-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
+          IMAGE_TAG_ALIAS: ppc64le-musl
         - IMAGE_TAG: mips-musl
           TARGET: mips-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
@@ -150,14 +155,17 @@ jobs:
           TARGET: mips64-unknown-linux-muslabi64
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: nightly
+          IMAGE_TAG_ALIAS: mips64-musl
         - IMAGE_TAG: mips64el-muslabi64
           TARGET: mips64el-unknown-linux-muslabi64
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: nightly
+          IMAGE_TAG_ALIAS: mips64le-musl
         - IMAGE_TAG: mipsel-musl
           TARGET: mipsel-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: nightly
+          IMAGE_TAG_ALIAS: mipsle-musl
         - IMAGE_TAG: s390x-musl
           TARGET: s390x-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
@@ -172,6 +180,7 @@ jobs:
           TARGET: x86_64-unknown-linux-musl
           RUST_MUSL_MAKE_CONFIG: config.mak
           TOOLCHAIN: stable
+          IMAGE_TAG_ALIAS: amd64-musl
 
   build:
     name: Build - ${{ matrix.os.arch }} - ${{ matrix.env.IMAGE_TAG }}
