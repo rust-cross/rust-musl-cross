@@ -54,6 +54,41 @@ rust-musl-builder cargo build --release
 This command assumes that `$(pwd)` is readable and writable. It will output binaries in `armv7-unknown-linux-musleabihf`.
 At the moment, it doesn't attempt to cache libraries between builds, so this is best reserved for making final release builds.
 
+## Docker-convention alias tags
+
+Several images are also published under Docker-convention tag names that match
+Docker's `TARGETARCH` build arg (e.g. `amd64`, `arm64`). The alias tag format is
+`<TARGETARCH>-musl`:
+
+| Primary tag          | Alias tag       |
+| -------------------- | --------------- |
+| `aarch64-musl`       | `arm64-musl`    |
+| `x86_64-musl`        | `amd64-musl`    |
+| `i686-musl`          | `386-musl`      |
+| `loongarch64-musl`   | `loong64-musl`  |
+| `powerpc64-musl`     | `ppc64-musl`    |
+| `powerpc64le-musl`   | `ppc64le-musl`  |
+| `mips64-muslabi64`   | `mips64-musl`   |
+| `mips64el-muslabi64` | `mips64le-musl` |
+| `mipsel-musl`        | `mipsle-musl`   |
+| `riscv64gc-musl`     | `riscv64-musl`  |
+
+This lets multi-platform Dockerfiles use `TARGETARCH` directly without any
+explicit build args:
+
+```dockerfile
+ARG TARGETARCH=amd64
+FROM ghcr.io/rust-cross/rust-musl-cross:${TARGETARCH}-musl AS builder
+```
+
+Docker sets `TARGETARCH` automatically from the native runner platform, so the
+same `docker buildx build --platform linux/amd64,linux/arm64` command selects
+the right image on each platform with no extra configuration.
+
+> **Note:** The `arm` variants (`arm-musleabi`, `arm-musleabihf`, `armv7-musleabi`,
+> `armv7-musleabihf`, `armv5te-musleabi`) are not aliased because they all map to
+> `GOARCH=arm`, making a single canonical `arm-musl` alias ambiguous.
+
 ## How it works
 
 `rust-musl-cross` uses [musl-libc][], [musl-gcc][] with the help of [musl-cross-make][] to make it easy to compile, and the new
