@@ -212,7 +212,7 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: docker build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           platforms: linux/${{ matrix.os.docker_arch || matrix.os.arch }}
           build-args: |
