@@ -50,6 +50,26 @@ GCC_CONFIG += --enable-languages=c,c++
 GCC_CONFIG += --disable-libquadmath --disable-decimal-float
 GCC_CONFIG += --disable-multilib
 
+# GCC defaults to ARMv5TE for the arm*-linux-musleabi* triples, which is older
+# than what these images advertise and older than what rustc targets, so
+# libstdc++.a ends up built without lock free atomics.
+
+ifeq ($(TARGET),armv7-unknown-linux-musleabihf)
+GCC_CONFIG += --with-arch=armv7-a --with-fpu=vfpv3-d16
+endif
+
+ifeq ($(TARGET),armv7-unknown-linux-musleabi)
+GCC_CONFIG += --with-arch=armv7-a
+endif
+
+ifeq ($(TARGET),arm-unknown-linux-musleabihf)
+GCC_CONFIG += --with-arch=armv6 --with-fpu=vfp
+endif
+
+ifeq ($(TARGET),arm-unknown-linux-musleabi)
+GCC_CONFIG += --with-arch=armv6
+endif
+
 # You can keep the local build path out of your toolchain binaries and
 # target libraries with the following, but then gdb needs to be told
 # where to look for source files.
