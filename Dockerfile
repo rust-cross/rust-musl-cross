@@ -123,8 +123,6 @@ ENV RUSTUP_HOME=/root/.rustup
 ENV CARGO_HOME=/root/.cargo
 ENV CARGO_BUILD_TARGET=$TARGET
 
-ENV CFLAGS_armv7_unknown_linux_musleabihf='-mfpu=vfpv3-d16'
-
 # Build statically linked binaries for MIPS targets
 ENV CARGO_TARGET_MIPS_UNKNOWN_LINUX_MUSL_RUSTFLAGS='-C target-feature=+crt-static'
 ENV CARGO_TARGET_MIPSEL_UNKNOWN_LINUX_MUSL_RUSTFLAGS='-C target-feature=+crt-static'
